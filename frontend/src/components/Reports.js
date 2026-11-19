@@ -20,18 +20,18 @@ const AXIS_TICK = { fontSize: 11, fill: 'var(--text-secondary)' };
 export const THIN_SAMPLE = 10;
 
 const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'setups', label: 'Setups & Strategy' },
-  { id: 'sources-tags', label: 'Sources & Tags' },
-  { id: 'timing', label: 'Timing' },
-  { id: 'execution', label: 'Execution' },
-  { id: 'symbols', label: 'Symbols' },
-  { id: 'psychology', label: 'Psychology' },
+  { id: 'overview', label: 'Vue d\'ensemble' },
+  { id: 'setups', label: 'Setups et stratégie' },
+  { id: 'sources-tags', label: 'Sources et tags' },
+  { id: 'timing', label: 'Horaire' },
+  { id: 'execution', label: 'Exécution' },
+  { id: 'symbols', label: 'Symboles' },
+  { id: 'psychology', label: 'Psychologie' },
 ];
 
 // Strategy and source tags mirror their own fields, so the tag report skips them.
 const TAG_TYPE_ORDER = ['mistake', 'execution', 'setup', 'emotion', 'outcome'];
-const TAG_TYPE_LABEL = { mistake: 'Mistakes', execution: 'Execution', setup: 'Setup', emotion: 'Emotion', outcome: 'Outcome' };
+const TAG_TYPE_LABEL = { mistake: 'Erreurs', execution: 'Exécution', setup: 'Setup', emotion: 'Émotion', outcome: 'Résultat' };
 
 function Section({ title, hint, children }) {
   return (
@@ -45,13 +45,13 @@ function Section({ title, hint, children }) {
 function NoData({ msg }) {
   return (
     <div className="empty">
-      {msg || 'Not enough data yet.'}
+      {msg || 'Pas encore assez de données.'}
     </div>
   );
 }
 
 /* Every /api/reports bucket has the same shape, so one table renders all of them. */
-function BucketTable({ rows, labelHead = 'Bucket', sortByPnl = false, max }) {
+function BucketTable({ rows, labelHead = 'Catégorie', sortByPnl = false, max }) {
   if (!rows || !rows.length) return <NoData />;
   let data = sortByPnl ? [...rows].sort((a, b) => b.net_pnl - a.net_pnl) : rows;
   if (max) data = data.slice(0, max);
@@ -65,14 +65,14 @@ function BucketTable({ rows, labelHead = 'Bucket', sortByPnl = false, max }) {
           <tr>
             <th style={{ paddingLeft: 24 }}>{labelHead}</th>
             <th className="num">Trades</th>
-            <th className="num">Win %</th>
-            <th className="num">Net P&amp;L</th>
-            <th className="num">Avg</th>
-            <th className="num">Avg Win</th>
-            <th className="num">Avg Loss</th>
-            <th className="num">PF</th>
-            <th className="num">Exit Eff.</th>
-            <th style={{ width: 120, paddingRight: 24 }}><span className="sr-only">Relative size</span></th>
+            <th className="num">Réussite %</th>
+            <th className="num">P&amp;L net</th>
+            <th className="num">Moy.</th>
+            <th className="num">Moy. Gain</th>
+            <th className="num">Moy. Perte</th>
+            <th className="num">FP</th>
+            <th className="num">Effic. sortie</th>
+            <th style={{ width: 120, paddingRight: 24 }}><span className="sr-only">Taille relative</span></th>
           </tr>
         </thead>
         <tbody>
@@ -83,7 +83,7 @@ function BucketTable({ rows, labelHead = 'Bucket', sortByPnl = false, max }) {
                 <td style={{ paddingLeft: 24, fontWeight: 600 }}>
                   {r.label}
                   {r.trades < THIN_SAMPLE && (
-                    <span className="v3-thin" title={`Fewer than ${THIN_SAMPLE} trades, so treat this row as noise`}>thin</span>
+                    <span className="v3-thin" title={`Moins de ${THIN_SAMPLE} trades, à traiter comme du bruit`}>faible</span>
                   )}
                 </td>
                 <td className="num text-muted">{r.trades}</td>
@@ -97,7 +97,7 @@ function BucketTable({ rows, labelHead = 'Bucket', sortByPnl = false, max }) {
                 <td className="num text-muted">{signed$(r.avg_win)}</td>
                 <td className="num text-muted">{fmt$(r.avg_loss)}</td>
                 <td className="num" style={{ fontWeight: 600 }}>
-                  {r.profit_factor == null ? <span className="text-muted" title="No losing trades in this row">&mdash;</span> : r.profit_factor.toFixed(2)}
+                  {r.profit_factor == null ? <span className="text-muted" title="Aucun trade perdant dans cette ligne">&mdash;</span> : r.profit_factor.toFixed(2)}
                 </td>
                 <td className="num text-muted">
                   {r.exit_efficiency == null ? '-' : `${r.exit_efficiency}%`}
@@ -150,7 +150,7 @@ function BucketBars({ rows, height = 240 }) {
                 <div className={`num ${tone(d.pnl)}`} style={{ fontWeight: 600 }}>
                   {signed$(d.pnl)}
                 </div>
-                <div className="text-muted">{d.trades} trades · {d.wr}% win</div>
+                <div className="text-muted">{d.trades} trades · {d.wr}% de réussite</div>
               </div>
             );
           }}
@@ -189,12 +189,12 @@ function EquityCurve({ curve }) {
             return (
               <div className="card" style={{ padding: '8px 12px', fontSize: 13 }}>
                 <div style={{ fontWeight: 600, marginBottom: 4 }}>{label}</div>
-                <div>Equity: <b className="num">{fmt$(d.cumulative)}</b></div>
+                <div>Capital : <b className="num">{fmt$(d.cumulative)}</b></div>
                 <div className={`num ${tone(d.pnl)}`}>
-                  Day: {signed$(d.pnl)}
+                  Jour : {signed$(d.pnl)}
                 </div>
                 {d.drawdown < 0 && (
-                  <div className="num neg">Drawdown: {fmt$(d.drawdown)}</div>
+                  <div className="num neg">Drawdown : {fmt$(d.drawdown)}</div>
                 )}
               </div>
             );
@@ -230,7 +230,7 @@ function DrawdownCurve({ curve }) {
             return (
               <div className="card" style={{ padding: '8px 12px', fontSize: 13 }}>
                 <div style={{ fontWeight: 600, marginBottom: 4 }}>{label}</div>
-                <div className="num neg">{fmt$(payload[0].value)} off peak</div>
+                <div className="num neg">{fmt$(payload[0].value)} sous le pic</div>
               </div>
             );
           }}
@@ -274,10 +274,10 @@ export default function Reports({ accountId }) {
   return (
     <div>
       <PageHeader
-        title="Reports"
-        subtitle={loading ? 'Loading...' : data
-          ? `${data.trade_count.toLocaleString('en-US')} trades across ${s.trading_days} sessions`
-          : 'No trades in range'}
+        title="Rapports"
+        subtitle={loading ? 'Chargement...' : data
+          ? `${data.trade_count.toLocaleString('en-US')} trades sur ${s.trading_days} séances`
+          : 'Aucun trade dans cette période'}
         actions={
           <DateRangePicker
             dateFrom={dateFrom}
@@ -287,7 +287,7 @@ export default function Reports({ accountId }) {
         }
       />
 
-      <div className="tabs" role="tablist" aria-label="Report sections" style={{ marginBottom: 20 }}>
+      <div className="tabs" role="tablist" aria-label="Sections du rapport" style={{ marginBottom: 20 }}>
         {TABS.map(t => (
           <button
             type="button"
@@ -312,10 +312,10 @@ export default function Reports({ accountId }) {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 0 18px' }}>
         <Seg
-          label="How to show every breakdown"
+          label="Comment afficher chaque répartition"
           value={view}
           onChange={setView}
-          options={[{ id: 'bars', label: 'Bars' }, { id: 'table', label: 'Table' }]}
+          options={[{ id: 'bars', label: 'Barres' }, { id: 'table', label: 'Tableau' }]}
         />
       </div>
 
@@ -324,7 +324,7 @@ export default function Reports({ accountId }) {
           {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 220 }} />)}
         </div>
       ) : !data ? (
-        <div className="card"><NoData msg="Import trades to see reports." /></div>
+        <div className="card"><NoData msg="Importez des trades pour voir les rapports." /></div>
       ) : (
         <div style={gap} role="tabpanel" id="report-panel" aria-labelledby={`report-tab-${tab}`}>
 
@@ -332,56 +332,56 @@ export default function Reports({ accountId }) {
             <>
               <Measures
                 items={[
-                  { label: 'Net P&L', value: signed$(s.net_pnl), met: s.net_pnl >= 0,
-                    read: `${s.green_days} green sessions against ${s.red_days} red` },
-                  { label: 'Max drawdown', value: fmt$(s.max_drawdown), tone: 'neg',
-                    read: `Deepest on ${s.max_drawdown_date}` },
-                  { label: 'Green days', value: `${s.green_days} / ${s.trading_days}`,
+                  { label: 'P&L net', value: signed$(s.net_pnl), met: s.net_pnl >= 0,
+                    read: `${s.green_days} séances vertes contre ${s.red_days} rouges` },
+                  { label: 'Drawdown max', value: fmt$(s.max_drawdown), tone: 'neg',
+                    read: `Le plus profond le ${s.max_drawdown_date}` },
+                  { label: 'Jours verts', value: `${s.green_days} / ${s.trading_days}`,
                     met: s.green_days > s.trading_days / 2,
-                    read: `${Math.round(s.green_days / s.trading_days * 100)}% of sessions closed up` },
-                  { label: 'Best day', value: signed$(s.best_day), met: true, read: 'Your largest single session' },
-                  { label: 'Worst day', value: fmt$(s.worst_day), tone: 'neg', read: 'Your deepest single session' },
-                  { label: 'Avg green day', value: signed$(s.avg_green_day), met: true,
-                    read: `Against an average red day of ${fmt$(s.avg_red_day)}` },
-                  { label: 'Longest streak', value: `${s.longest_win_streak}W`, met: true,
-                    read: `Worst run ${s.longest_loss_streak}L` },
-                  { label: 'Trades / day', value: String(s.avg_trades_per_day), read: 'Across every session in range' },
+                    read: `${Math.round(s.green_days / s.trading_days * 100)}% des séances clôturées en hausse` },
+                  { label: 'Meilleur jour', value: signed$(s.best_day), met: true, read: 'Votre meilleure séance' },
+                  { label: 'Pire jour', value: fmt$(s.worst_day), tone: 'neg', read: 'Votre pire séance' },
+                  { label: 'Moy. jour vert', value: signed$(s.avg_green_day), met: true,
+                    read: `Contre un jour rouge moyen de ${fmt$(s.avg_red_day)}` },
+                  { label: 'Plus longue série', value: `${s.longest_win_streak}G`, met: true,
+                    read: `Pire série ${s.longest_loss_streak}P` },
+                  { label: 'Trades / jour', value: String(s.avg_trades_per_day), read: 'Sur toutes les séances de la période' },
                 ]}
               />
 
               <div className="grid-2-1">
-                <Section title="Equity Curve" hint="Cumulative net P&L by trading day.">
+                <Section title="Courbe de capital" hint="P&L net cumulé par jour de trading.">
                   <EquityCurve curve={data.equity_curve} />
                 </Section>
 
-                <Section title="Drawdown" hint="Distance below the running equity peak. This is the number a prop firm watches.">
+                <Section title="Drawdown" hint="Distance sous le pic de capital en cours. C'est le chiffre que surveille une prop firm.">
                   <DrawdownCurve curve={data.equity_curve} />
                 </Section>
               </div>
 
-              <Section title="Monthly Performance">
-                <Breakdown view={view} rows={data.by_month} labelHead="Month" height={260} />
+              <Section title="Performance mensuelle">
+                <Breakdown view={view} rows={data.by_month} labelHead="Mois" height={260} />
               </Section>
             </>
           )}
 
           {tab === 'setups' && (
             <>
-              <Section title="By Setup" hint="Playbook setups you tagged on your trades.">
+              <Section title="Par setup" hint="Les setups de votre playbook que vous avez tagués sur vos trades.">
                 <Breakdown view={view} rows={data.by_setup} labelHead="Setup" sortByPnl />
               </Section>
-              <Section title="By Setup Grade" hint="A++ down to F. A monotonic ladder means the grading is real.">
-                <Breakdown view={view} rows={data.by_grade} labelHead="Grade" />
+              <Section title="Par note de setup" hint="De A++ à F. Une échelle monotone signifie que la notation est fiable.">
+                <Breakdown view={view} rows={data.by_grade} labelHead="Note" />
               </Section>
-              <Section title="By Strategy" hint="What the diary analysis tagged the trade as.">
-                <Breakdown view={view} rows={data.by_strategy} labelHead="Strategy" sortByPnl max={20} />
+              <Section title="Par stratégie" hint="Ce que l'analyse du journal a identifié pour le trade.">
+                <Breakdown view={view} rows={data.by_strategy} labelHead="Stratégie" sortByPnl max={20} />
               </Section>
               <div className="grid-2">
-                <Section title="By Instrument">
+                <Section title="Par instrument">
                   <Breakdown view={view} rows={data.by_instrument} labelHead="Type" sortByPnl />
                 </Section>
                 <Section title="Long vs Short">
-                  <Breakdown view={view} rows={data.by_side} labelHead="Side" sortByPnl />
+                  <Breakdown view={view} rows={data.by_side} labelHead="Côté" sortByPnl />
                 </Section>
               </div>
             </>
@@ -389,74 +389,74 @@ export default function Reports({ accountId }) {
 
           {tab === 'sources-tags' && (
             <>
-              <Section title="By Source" hint="Where the idea or alert came from. Each trade has one source.">
+              <Section title="Par source" hint="D'où vient l'idée ou l'alerte. Chaque trade a une seule source.">
                 <Breakdown view={view} rows={data.by_source || []} labelHead="Source" sortByPnl />
               </Section>
               {TAG_TYPE_ORDER.filter(t => (data.by_tag || {})[t]?.length).map((t, i) => (
                 <Section
                   key={t}
-                  title={`Tags: ${TAG_TYPE_LABEL[t]}`}
-                  hint={i === 0 ? 'A trade with several tags counts under each of them, so tag rows do not add up to your net P&L.' : undefined}
+                  title={`Tags : ${TAG_TYPE_LABEL[t]}`}
+                  hint={i === 0 ? 'Un trade avec plusieurs tags est compté dans chacun d\'eux, donc les lignes de tags ne s\'additionnent pas à votre P&L net.' : undefined}
                 >
                   <Breakdown view={view} rows={data.by_tag[t]} labelHead="Tag" sortByPnl />
                 </Section>
               ))}
               {!Object.keys(data.by_tag || {}).length && (
-                <Section title="Tags"><div className="empty">No tagged trades in this period.</div></Section>
+                <Section title="Tags"><div className="empty">Aucun trade tagué sur cette période.</div></Section>
               )}
             </>
           )}
 
           {tab === 'timing' && (
             <>
-              <Section title="By Day of Week">
-                <Breakdown view={view} rows={data.by_day_of_week} labelHead="Day" />
+              <Section title="Par jour de la semaine">
+                <Breakdown view={view} rows={data.by_day_of_week} labelHead="Jour" />
               </Section>
-              <Section title="By Time of Day" hint="Bucketed on first entry.">
-                <Breakdown view={view} rows={data.by_session} labelHead="Entry window" />
+              <Section title="Par heure de la journée" hint="Regroupé sur la première entrée.">
+                <Breakdown view={view} rows={data.by_session} labelHead="Fenêtre d'entrée" />
               </Section>
-              <Section title="By Hold Time" hint="First entry to last exit. Short holds are usually stop-outs and chases.">
-                <Breakdown view={view} rows={data.by_hold_time} labelHead="Hold" />
+              <Section title="Par durée de détention" hint="De la première entrée à la dernière sortie. Les détentions courtes sont généralement des stops ou des poursuites de prix.">
+                <Breakdown view={view} rows={data.by_hold_time} labelHead="Détention" />
               </Section>
             </>
           )}
 
           {tab === 'execution' && (
             <>
-              <Section title="Scaled Out vs All-or-Nothing"
-                       hint="Trades with more than one exit fill vs a single exit.">
-                <Breakdown view={view} rows={data.by_management} labelHead="Management" height={200} />
+              <Section title="Sortie échelonnée vs tout-ou-rien"
+                       hint="Trades avec plusieurs sorties vs une seule sortie.">
+                <Breakdown view={view} rows={data.by_management} labelHead="Gestion" height={200} />
               </Section>
               <div className="grid-2">
-                <Section title="R-Multiple Distribution" hint="Realized R per trade, from the diary analysis.">
+                <Section title="Distribution du Multiple R" hint="R réalisé par trade, d'après l'analyse du journal.">
                   <RMultipleDist data={edge?.r_multiple_dist} />
                 </Section>
-                <Section title="Hold Time: Winners vs Losers">
+                <Section title="Durée de détention : gagnants vs perdants">
                   <HoldTime data={edge?.hold_time} />
                 </Section>
               </div>
-              <Section title="Exit Efficiency by Setup"
-                       hint="Percent of the maximum favorable excursion you actually captured, winners only. 40-60% is a normal band for a discretionary day trader.">
+              <Section title="Efficacité de sortie par setup"
+                       hint="Pourcentage de l'excursion favorable maximale réellement capturé, gagnants uniquement. 40-60% est une plage normale pour un day trader discrétionnaire.">
                 <Breakdown view={view} rows={data.by_setup} labelHead="Setup" sortByPnl />
               </Section>
             </>
           )}
 
           {tab === 'symbols' && (
-            <Section title="By Symbol" hint="Top 40 by net P&L. Watch for a single name carrying the account.">
-              <Breakdown view={view} rows={data.by_symbol} labelHead="Symbol" sortByPnl />
+            <Section title="Par symbole" hint="Top 40 par P&L net. Attention si un seul symbole porte tout le compte.">
+              <Breakdown view={view} rows={data.by_symbol} labelHead="Symbole" sortByPnl />
             </Section>
           )}
 
           {tab === 'psychology' && (
             <>
-              <Section title="By Emotional State" hint="Self-reported in the diary. Revenge and frustrated rows are the ones to read.">
-                <Breakdown view={view} rows={data.by_emotion} labelHead="Emotion" sortByPnl />
+              <Section title="Par état émotionnel" hint="Auto-déclaré dans le journal. Les lignes « revanche » et « frustré » sont celles à surveiller.">
+                <Breakdown view={view} rows={data.by_emotion} labelHead="Émotion" sortByPnl />
               </Section>
-              <Section title="Emotion vs Outcome">
+              <Section title="Émotion vs résultat">
                 <EmotionTable data={edge?.emotion_outcomes} />
               </Section>
-              <Section title="Mistake Frequency">
+              <Section title="Fréquence des erreurs">
                 <MistakeFreq data={edge?.mistake_frequency} />
               </Section>
             </>

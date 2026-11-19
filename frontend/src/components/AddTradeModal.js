@@ -40,8 +40,8 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.account_id) { setError('Please select an account.'); return; }
-    if (!form.ticker.trim()) { setError('Ticker is required.'); return; }
+    if (!form.account_id) { setError('Veuillez sélectionner un compte.'); return; }
+    if (!form.ticker.trim()) { setError('Le symbole est obligatoire.'); return; }
     setSaving(true);
     setError(null);
     try {
@@ -69,23 +69,23 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="add-trade-title" ref={dialogRef} tabIndex={-1}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 id="add-trade-title" className="section-title">Add Trade</h2>
-          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Close"><X size={18} /></button>
+          <h2 id="add-trade-title" className="section-title">Ajouter un trade</h2>
+          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Fermer"><X size={18} /></button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
 
             <div>
-              <label className="field-label" htmlFor="at-account">Account</label>
+              <label className="field-label" htmlFor="at-account">Compte</label>
               <select id="at-account" style={fieldStyle} value={form.account_id} onChange={e => update('account_id', e.target.value)} required>
-                <option value="">Select account...</option>
+                <option value="">Sélectionner un compte...</option>
                 {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-ticker">Ticker</label>
+              <label className="field-label" htmlFor="at-ticker">Symbole</label>
               <input id="at-ticker" style={fieldStyle} placeholder="AAPL" value={form.ticker} onChange={e => update('ticker', e.target.value)} required />
             </div>
 
@@ -95,21 +95,21 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-time">Time (optional)</label>
+              <label className="field-label" htmlFor="at-time">Heure (facultatif)</label>
               <input id="at-time" type="time" style={fieldStyle} value={form.time} onChange={e => update('time', e.target.value)} />
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-type">Instrument Type</label>
+              <label className="field-label" htmlFor="at-type">Type d'instrument</label>
               <select id="at-type" style={fieldStyle} value={form.instrument_type} onChange={e => update('instrument_type', e.target.value)}>
-                <option value="STOCK">Stock</option>
+                <option value="STOCK">Action</option>
                 <option value="OPTION">Option</option>
-                <option value="FUTURE">Future</option>
+                <option value="FUTURE">Contrat à terme</option>
               </select>
             </div>
 
             <div>
-              <span className="field-label" id="at-side-label">Side</span>
+              <span className="field-label" id="at-side-label">Sens</span>
               <div className="seg" role="group" aria-labelledby="at-side-label" style={{ display: 'flex' }}>
                 {['LONG', 'SHORT'].map(s => (
                   <button
@@ -119,24 +119,24 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
                     style={{ flex: 1 }}
                     onClick={() => update('side', s)}
                   >
-                    {s}
+                    {s === 'LONG' ? 'Long' : 'Short'}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-entry">Entry Price</label>
+              <label className="field-label" htmlFor="at-entry">Prix d'entrée</label>
               <input id="at-entry" type="number" step="0.01" style={fieldStyle} placeholder="0.00" value={form.entry_price} onChange={e => update('entry_price', e.target.value)} required />
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-exit">Exit Price</label>
-              <input id="at-exit" type="number" step="0.01" style={fieldStyle} placeholder="0.00 (optional)" value={form.exit_price} onChange={e => update('exit_price', e.target.value)} />
+              <label className="field-label" htmlFor="at-exit">Prix de sortie</label>
+              <input id="at-exit" type="number" step="0.01" style={fieldStyle} placeholder="0.00 (facultatif)" value={form.exit_price} onChange={e => update('exit_price', e.target.value)} />
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-qty">Quantity</label>
+              <label className="field-label" htmlFor="at-qty">Quantité</label>
               <input id="at-qty" type="number" min="1" style={fieldStyle} value={form.quantity} onChange={e => update('quantity', e.target.value)} />
             </div>
 
@@ -146,12 +146,12 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-stop">Stop Loss</label>
-              <input id="at-stop" type="number" step="0.01" style={fieldStyle} placeholder="Price level" value={form.stop_loss} onChange={e => update('stop_loss', e.target.value)} />
+              <label className="field-label" htmlFor="at-stop">Stop loss</label>
+              <input id="at-stop" type="number" step="0.01" style={fieldStyle} placeholder="Niveau de prix" value={form.stop_loss} onChange={e => update('stop_loss', e.target.value)} />
             </div>
 
             <div>
-              <label className="field-label" htmlFor="at-strategy">Strategy</label>
+              <label className="field-label" htmlFor="at-strategy">Stratégie</label>
               <input id="at-strategy" style={fieldStyle} placeholder="VWAP Support..." value={form.strategy} onChange={e => update('strategy', e.target.value)} />
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
               id="at-notes"
               rows={3}
               style={{ width: '100%', resize: 'vertical' }}
-              placeholder="Trade notes..."
+              placeholder="Notes du trade..."
               value={form.notes}
               onChange={e => update('notes', e.target.value)}
             />
@@ -170,7 +170,7 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
 
           {pnl != null && (
             <div className={`notice ${Number(pnl) >= 0 ? 'pos' : 'neg'}`} style={{ marginTop: 14 }} aria-live="polite">
-              Estimated Net P&L: <strong className={`num ${Number(pnl) >= 0 ? 'pos' : 'neg'}`}>
+              P&L net estimé : <strong className={`num ${Number(pnl) >= 0 ? 'pos' : 'neg'}`}>
                 {Number(pnl) >= 0 ? '+' : '-'}${Math.abs(Number(pnl)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </strong>
             </div>
@@ -182,9 +182,9 @@ export default function AddTradeModal({ accounts, defaultAccountId, onClose, onS
 
           <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
             <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={saving}>
-              {saving ? 'Saving...' : 'Save Trade'}
+              {saving ? 'Enregistrement...' : 'Enregistrer le trade'}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Annuler</button>
           </div>
         </form>
       </div>

@@ -53,10 +53,10 @@ function Markdown({ text }) {
 // ── Suggested prompts ─────────────────────────────────────────────────────────
 
 const SUGGESTIONS = [
-  'What is my best performing strategy?',
-  'Show my win rate by ticker',
-  'Where am I losing the most money?',
-  'How is my risk management?',
+  'Quelle est ma meilleure stratégie ?',
+  'Montre mon taux de réussite par symbole',
+  'Où est-ce que je perds le plus d\'argent ?',
+  'Comment est ma gestion du risque ?',
 ];
 
 // ── Brain component ───────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
       const res = await brainApi.chat(nextMessages, accountId);
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.response }]);
     } catch (e) {
-      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${e.response?.data?.detail || e.message}` }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Erreur : ${e.response?.data?.detail || e.message}` }]);
     } finally {
       setLoading(false);
     }
@@ -110,7 +110,7 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
         <div
           className="brain-panel"
           role="dialog"
-          aria-label="Brain, AI trading coach"
+          aria-label="Brain, coach IA de trading"
           onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }}
         >
           {/* Header */}
@@ -119,10 +119,10 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
               <BrainIcon size={20} className="text-purple" aria-hidden="true" />
               <div>
                 <div className="section-title" style={{ fontSize: 16 }}>Brain</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>AI Trading Coach</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Coach IA de trading</div>
               </div>
             </div>
-            <button type="button" className="btn btn-ghost btn-icon" onClick={() => setOpen(false)} aria-label="Close Brain">
+            <button type="button" className="btn btn-ghost btn-icon" onClick={() => setOpen(false)} aria-label="Fermer Brain">
               <X size={16} />
             </button>
           </div>
@@ -132,7 +132,7 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
             {messages.length === 0 && (
               <div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 12, lineHeight: 1.5 }}>
-                  Hi! I'm Brain, your AI trading coach. Ask me anything about your performance, patterns, or strategy.
+                  Salut ! Je suis Brain, ton coach IA de trading. Demande-moi tout sur ta performance, tes patterns ou ta stratégie.
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {SUGGESTIONS.map((s, i) => (
@@ -160,7 +160,7 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
             ))}
 
             {loading && (
-              <div style={{ alignSelf: 'flex-start', padding: '10px 14px', background: 'var(--surface-inset)', border: '1px solid var(--divider-soft)', borderRadius: '10px 10px 10px 3px', display: 'flex', gap: 4, alignItems: 'center' }} aria-label="Brain is thinking">
+              <div style={{ alignSelf: 'flex-start', padding: '10px 14px', background: 'var(--surface-inset)', border: '1px solid var(--divider-soft)', borderRadius: '10px 10px 10px 3px', display: 'flex', gap: 4, alignItems: 'center' }} aria-label="Brain réfléchit">
                 {[0, 1, 2].map(j => (
                   <div key={j} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-line)', animation: `pulse 1s ${j * 0.2}s infinite` }} />
                 ))}
@@ -176,8 +176,8 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="Ask Brain anything..."
-              aria-label="Message Brain"
+              placeholder="Demande n'importe quoi à Brain..."
+              aria-label="Message à Brain"
               disabled={loading}
               style={{ flex: 1, fontSize: 14 }}
             />
@@ -186,7 +186,7 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
               className="btn btn-primary btn-icon"
               onClick={() => send()}
               disabled={loading || !input.trim()}
-              aria-label="Send message"
+              aria-label="Envoyer le message"
             >
               <Send size={15} />
             </button>
@@ -198,7 +198,7 @@ export default function Brain({ accountId, open: openProp, onOpenChange }) {
           type="button"
           className="brain-launcher"
           onClick={() => setOpen(true)}
-          title="Open Brain, AI Trading Coach"
+          title="Ouvrir Brain, coach IA de trading"
         >
           <BrainIcon size={18} className="text-purple" aria-hidden="true" />
           Brain

@@ -15,14 +15,14 @@ function compBadge(curr, prev, type = 'number') {
   const c = up ? 'var(--green)' : 'var(--red)';
   let label;
   if (type === 'percent') {
-    label = `${up ? '↑ +' : '↓ '}${Math.abs(delta).toFixed(1)} pp`;
+    label = `${up ? '↑ +' : '↓ '}${Math.abs(delta).toFixed(1)} pts`;
   } else if (type === 'currency') {
     const abs = Math.abs(delta);
     label = (up ? '↑ +$' : '↓ -$') + (abs >= 1000 ? `${(abs / 1000).toFixed(1)}K` : Math.round(abs).toString());
   } else {
     label = `${up ? '↑ +' : '↓ '}${Math.abs(delta).toFixed(2)}`;
   }
-  return <div style={{ fontSize: 13, color: c, fontWeight: 600, marginTop: 6 }}>{label} vs prev</div>;
+  return <div style={{ fontSize: 13, color: c, fontWeight: 600, marginTop: 6 }}>{label} vs préc.</div>;
 }
 
 // Semi-circular gauge (180° arc)
@@ -81,7 +81,7 @@ export function WinRateCard({ winRate, winningTrades, losingTrades, prevWinRate,
   const color = winRate >= 50 ? 'var(--green)' : 'var(--red)';
   return (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 140 }}>
-      <div className="kpi-label" style={{ alignSelf: 'flex-start' }}>Trade Win %</div>
+      <div className="kpi-label" style={{ alignSelf: 'flex-start' }}>Taux de réussite (trades)</div>
       <SemiGauge value={winRate} max={100} color={color} size={110} />
       <div style={{ fontSize: 22, fontWeight: 700, color, marginTop: -10, textAlign: 'center' }}>
         {Number(winRate || 0).toFixed(1)}%
@@ -104,7 +104,7 @@ export function ProfitFactorCard({ profitFactor, prevProfitFactor, goal }) {
   const color = profitFactor >= 1.5 ? 'var(--green)' : profitFactor >= 1 ? 'var(--blue)' : 'var(--red)';
   return (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 140 }}>
-      <div className="kpi-label" style={{ alignSelf: 'flex-start' }}>Profit Factor</div>
+      <div className="kpi-label" style={{ alignSelf: 'flex-start' }}>Facteur de profit</div>
       <div style={{ position: 'relative', marginTop: 4 }}>
         <CircleGauge value={profitFactor} max={3} color={color} size={90} />
         <div style={{
@@ -128,7 +128,7 @@ export function DayWinCard({ dayWinRate, positiveDays, tradingDays, prevDayWinRa
   const color = dayWinRate >= 50 ? 'var(--green)' : 'var(--red)';
   return (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 140 }}>
-      <div className="kpi-label" style={{ alignSelf: 'flex-start' }}>Day Win %</div>
+      <div className="kpi-label" style={{ alignSelf: 'flex-start' }}>Taux de réussite (jours)</div>
       <SemiGauge value={dayWinRate} max={100} color={color} size={110} />
       <div style={{ fontSize: 22, fontWeight: 700, color, marginTop: -10, textAlign: 'center' }}>
         {Number(dayWinRate || 0).toFixed(1)}%
@@ -159,7 +159,7 @@ export function AvgWinLossCard({ avgWin, avgLoss, prevAvgWin, prevAvgLoss, goal 
   const prevRatio = prevLoss > 0 ? prevWin / prevLoss : null;
   return (
     <div className="card" style={{ minWidth: 140 }}>
-      <div className="kpi-label">Avg Win / Loss</div>
+      <div className="kpi-label">Gain moyen / Perte moyenne</div>
       <div className="kpi-value" style={{ color: 'var(--text)', marginBottom: 12 }}>{ratio}</div>
       <div style={{ height: 8, borderRadius: 4, background: 'var(--border)', overflow: 'hidden', marginBottom: 8 }}>
         <div style={{ height: '100%', width: `${winPct}%`, background: 'var(--green)', borderRadius: 4, transition: 'width 0.4s' }} />
@@ -189,9 +189,9 @@ export function ExitEfficiencyCard({ efficiency, maeWin, maeLoss, n, prevEfficie
     <div className="card" style={{ minWidth: 140 }}>
       <div
         className="kpi-label"
-        title="Of the move available while you were in the trade, how much you actually booked. Winners only."
+        title="Sur le mouvement disponible pendant que vous étiez en position, la part réellement encaissée. Gains uniquement."
       >
-        Exit Efficiency
+        Efficacité de sortie
       </div>
       <div className="kpi-value" style={{ color, marginBottom: 12 }}>
         {eff == null ? '—' : `${eff.toFixed(0)}%`}
@@ -201,7 +201,7 @@ export function ExitEfficiencyCard({ efficiency, maeWin, maeLoss, n, prevEfficie
       </div>
       <div
         style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}
-        title="Average MAE: the worst unrealised loss reached. Winners vs losers: the wider the gap, the better a tight stop separates them."
+        title="MAE moyenne : la pire perte latente atteinte. Gains vs pertes : plus l'écart est grand, mieux un stop serré les sépare."
       >
         <span style={{ color: 'var(--green)', fontWeight: 600 }}>
           MAE {maeWin == null ? '—' : `${Number(maeWin).toFixed(2)}%`}
@@ -235,13 +235,13 @@ export function NetPnlCard({ netPnl, grossPnl, commissions, totalTrades, prevNet
   const bigSize = dollars.length <= 7 ? 28 : dollars.length <= 9 ? 24 : 21;
 
   const foot = [
-    grossPnl != null ? { label: 'Gross', value: fmt$(grossPnl), color: 'var(--text)' } : null,
-    commissions != null ? { label: 'Comm', value: `-${fmt$(Math.abs(commissions))}`, color: 'var(--red)' } : null,
+    grossPnl != null ? { label: 'Brut', value: fmt$(grossPnl), color: 'var(--text)' } : null,
+    commissions != null ? { label: 'Comm.', value: `-${fmt$(Math.abs(commissions))}`, color: 'var(--red)' } : null,
   ].filter(Boolean);
 
   return (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', minWidth: 140 }}>
-      <div className="kpi-label">Net P&amp;L</div>
+      <div className="kpi-label">P&amp;L net</div>
 
       <div style={{
         fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1',

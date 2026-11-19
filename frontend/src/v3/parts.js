@@ -24,9 +24,9 @@ export const moneyK = (v) => {
 export const tone = (v) => (Number(v) > 0 ? 'v3-pos' : Number(v) < 0 ? 'v3-neg' : 'v3-flat');
 export const pct = (v, d = 1) => `${(Number(v) || 0).toFixed(d)}%`;
 
-const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-export const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+const MON = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+export const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 export const shortDate = (d) => {
   if (!d) return '';
   const p = String(d).split('-');
@@ -48,7 +48,7 @@ export function Measures({ items, className = '' }) {
             <div className="v3-track">
               <div className="v3-track-rail" />
               <div className={`v3-track-fill${m.met ? ' met' : ''}`} style={{ '--f': m.fill }} />
-              <div className="v3-track-goal" style={{ '--g': `${m.goalPct}%` }} data-g={`goal ${m.goal}`} />
+              <div className="v3-track-goal" style={{ '--g': `${m.goalPct}%` }} data-g={`objectif ${m.goal}`} />
             </div>
           )}
           {m.read && <div className="v3-m-read">{m.read}</div>}
@@ -98,7 +98,7 @@ export function Grade({ grade, reason }) {
       </button>
       {open && reason && (
         <span className="v3-gtip" id={id} role="tooltip">
-          <b>Grade {grade}</b>{reason}
+          <b>Note {grade}</b>{reason}
         </span>
       )}
     </span>
@@ -187,7 +187,7 @@ export function EquityCurve({ days, height = 190, onPick }) {
     setHover(Math.round(f * (pts.length - 1)));
   }, [pts.length]);
 
-  if (!geom) return <div className="v3-empty">Not enough sessions to draw a curve yet.</div>;
+  if (!geom) return <div className="v3-empty">Pas encore assez de séances pour tracer une courbe.</div>;
 
   const h = hover == null ? null : pts[hover];
   const leftPct = hover == null ? 0 : (geom.X(hover) / W) * 100;
@@ -229,7 +229,7 @@ export function EquityCurve({ days, height = 190, onPick }) {
             <div className={`v v3-${h.cum >= 0 ? 'pos' : 'neg'}`}>{money(h.cum)}</div>
             <div className="r">
               <span className={tone(h.day)}>{money(h.day)}</span>
-              <span style={{ color: 'var(--text-tertiary)' }}> that day</span>
+              <span style={{ color: 'var(--text-tertiary)' }}> ce jour-là</span>
             </div>
           </div>
         </>
@@ -258,13 +258,13 @@ export function SessionStrip({ days, onPick, onHover }) {
     return { best: b, worst: w };
   }, [days]);
 
-  if (!days || !days.length) return <div className="v3-empty">No sessions in this range.</div>;
+  if (!days || !days.length) return <div className="v3-empty">Aucune séance sur cette période.</div>;
 
   return (
     <div
       className="v3-strip"
       role="group"
-      aria-label="Every session in the period"
+      aria-label="Toutes les séances de la période"
       onPointerLeave={() => onHover && onHover(null)}
     >
       <div className="v3-midline" />
@@ -294,7 +294,7 @@ export function SessionStrip({ days, onPick, onHover }) {
             className={`v3-peak${k ? ' low' : ''}`}
             style={{ left: `${at}%`, transform: at > 70 ? 'translateX(-100%)' : undefined }}
           >
-            {k ? 'worst ' : 'best '}<b>{shortDate(days[idx].date)}</b>
+            {k ? 'pire ' : 'meilleur '}<b>{shortDate(days[idx].date)}</b>
           </span>
         );
       })}
@@ -321,7 +321,7 @@ export function MonthGrid({ year, month, byDay, today, onPick }) {
 
   return (
     <div className="v3-cal">
-      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Week'].map((d) => (
+      {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Semaine'].map((d) => (
         <div className="v3-dow" key={d}>{d}</div>
       ))}
       {rows.map((row, ri) => {
@@ -365,9 +365,9 @@ export function MonthGrid({ year, month, byDay, today, onPick }) {
           <div style={{ display: 'contents' }} key={`r${ri}`}>
             {cellNodes}
             <div className="v3-wk">
-              <span className="l">Week {ri + 1}</span>
+              <span className="l">Semaine {ri + 1}</span>
               <span className={`v ${wd ? tone(wt) : 'v3-flat'}`}>{wd ? moneyK(wt) : ''}</span>
-              <span className="c">{wd ? `${wd} session${wd === 1 ? '' : 's'}` : 'no sessions'}</span>
+              <span className="c">{wd ? `${wd} séance${wd === 1 ? '' : 's'}` : 'aucune séance'}</span>
             </div>
           </div>
         );

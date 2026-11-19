@@ -57,7 +57,7 @@ export function DayCurve({ trades, onPick }) {
     return { X, Y, d, area, zero: Y(0), final: prev };
   }, [marks]);
 
-  if (!geom) return <div className="v3-empty">No timed executions on this day, so the session cannot be drawn.</div>;
+  if (!geom) return <div className="v3-empty">Aucune exécution horodatée ce jour-là, la séance ne peut pas être tracée.</div>;
 
   const peak = Math.max(1, ...marks.map((m) => Math.abs(m.pnl)));
   const up = geom.final >= 0;
@@ -100,7 +100,7 @@ export function DayCurve({ trades, onPick }) {
               left: `${leftPct}%`, top: `${topPct}%`, width: size, height: size,
               background: m.pnl >= 0 ? 'var(--result-pos)' : 'var(--result-neg)',
             }}
-            aria-label={`${m.trade.ticker} at ${m.at ? `${Math.floor(m.at)}:${String(Math.round((m.at % 1) * 60)).padStart(2, '0')}` : ''}, ${money2(m.pnl)}`}
+            aria-label={`${m.trade.ticker} à ${m.at ? `${Math.floor(m.at)}:${String(Math.round((m.at % 1) * 60)).padStart(2, '0')}` : ''}, ${money2(m.pnl)}`}
             onPointerEnter={() => setHover(i)}
             onFocus={() => setHover(i)}
             onClick={() => onPick && onPick(m.trade)}
@@ -119,7 +119,7 @@ export function DayCurve({ trades, onPick }) {
         >
           <div className="d">{marks[hover].trade.ticker}</div>
           <div className={`v ${tone(marks[hover].pnl)}`}>{money2(marks[hover].pnl)}</div>
-          <div className="r">running {money(marks[hover].cum)}</div>
+          <div className="r">cumul {money(marks[hover].cum)}</div>
         </div>
       )}
     </div>
@@ -134,7 +134,7 @@ export function DayCurve({ trades, onPick }) {
 function Delta({ day, all, digits = 1, unit = '', prefix = '' }) {
   if (day == null || all == null || !Number.isFinite(Number(day)) || !Number.isFinite(Number(all))) return null;
   const d = Number(day) - Number(all);
-  if (Math.abs(d) < 10 ** -digits / 2) return <span className="v3-flat"> level</span>;
+  if (Math.abs(d) < 10 ** -digits / 2) return <span className="v3-flat"> stable</span>;
   const cls = d > 0 ? 'v3-pos' : 'v3-neg';
   const abs = Math.abs(d).toFixed(digits);
   return <span className={cls}> {d > 0 ? '+' : '−'}{prefix}{abs}{unit}</span>;
@@ -169,43 +169,43 @@ export function DayMeasures({ kpis, trades, summary, allTime }) {
   const perTrade = n ? net / n : null;
   const allExp = a && a.expectancy != null ? Number(a.expectancy) : null;
 
-  const allLine = (label, value) => (a && value != null ? <>All-time {label}{value}</> : null);
+  const allLine = (label, value) => (a && value != null ? <>Depuis le début {label}{value}</> : null);
 
   return (
     <Measures
       className="v3-measures-4"
       items={[
         {
-          label: 'Net for the day',
+          label: 'Net du jour',
           value: money2(net),
           met: net >= 0,
           tone: net < 0 ? 'neg' : undefined,
           read: avgDay == null
-            ? `${wins} green, ${losses} red`
-            : <>Your average day {money(avgDay)}<Delta day={net} all={avgDay} digits={0} prefix="$" /></>,
+            ? `${wins} verts, ${losses} rouges`
+            : <>Votre journée moyenne {money(avgDay)}<Delta day={net} all={avgDay} digits={0} prefix="$" /></>,
         },
         {
-          label: 'Win rate',
+          label: 'Taux de réussite',
           value: n ? `${Number(k.win_rate || 0).toFixed(0)}%` : '—',
           read: <>
-            {wins} of {n} won.{' '}
+            {wins} sur {n} gagnés.{' '}
             {allLine('', a ? `${Number(a.win_rate || 0).toFixed(1)}%` : null)}
             {a && n ? <Delta day={k.win_rate} all={a.win_rate} unit="pp" /> : null}
           </>,
         },
         {
-          label: 'Profit factor',
-          value: noLosers ? 'No losers' : pf == null ? '—' : pf.toFixed(2),
+          label: 'Facteur de profit',
+          value: noLosers ? 'Aucun perdant' : pf == null ? '—' : pf.toFixed(2),
           met: noLosers || (pf != null && pf >= 1),
           tone: pf != null && pf < 1 ? 'neg' : undefined,
           read: <>
-            {noLosers ? 'Nothing to divide by today. ' : ''}
+            {noLosers ? 'Rien à diviser aujourd\'hui. ' : ''}
             {allLine('', a && a.profit_factor != null ? Number(a.profit_factor).toFixed(2) : null)}
             {pf != null && a && a.profit_factor != null ? <Delta day={pf} all={a.profit_factor} digits={2} unit="x" /> : null}
           </>,
         },
         {
-          label: 'Avg win',
+          label: 'Gain moyen',
           value: k.avg_win ? money(k.avg_win) : '—',
           read: <>
             {allLine('', a && a.avg_win ? money(a.avg_win) : null)}
@@ -213,39 +213,39 @@ export function DayMeasures({ kpis, trades, summary, allTime }) {
           </>,
         },
         {
-          label: 'Avg per trade',
+          label: 'Moy. par trade',
           value: perTrade == null ? '—' : money2(perTrade),
           tone: perTrade != null && perTrade < 0 ? 'neg' : undefined,
           read: <>
-            {allExp != null ? <>All-time expectancy {money2(allExp)}</> : 'Net divided by trades'}
+            {allExp != null ? <>Espérance depuis le début {money2(allExp)}</> : 'Net divisé par le nombre de trades'}
             {perTrade != null && allExp != null ? <Delta day={perTrade} all={allExp} digits={0} prefix="$" /> : null}
           </>,
         },
         {
-          label: 'Exit efficiency',
+          label: 'Efficacité de sortie',
           value: eff == null ? '—' : `${eff.toFixed(0)}%`,
           amber: eff != null && allEff != null && eff < allEff,
           read: eff == null
-            ? 'No excursion data for these trades'
+            ? 'Pas de données d\'excursion pour ces trades'
             : <>
-              Share of the move you kept.{' '}
-              {allEff != null ? <>All-time {allEff.toFixed(0)}%</> : null}
+              Part du mouvement conservée.{' '}
+              {allEff != null ? <>Depuis le début {allEff.toFixed(0)}%</> : null}
               {allEff != null ? <Delta day={eff} all={allEff} digits={0} unit="pp" /> : null}
             </>,
         },
         {
-          label: 'Given back',
+          label: 'Rendu au marché',
           value: given > 0 ? money(-given) : '$0',
           amber: given > 0,
           read: peak > 0
-            ? `From a session high of ${money(peak)}`
-            : 'The session never went green',
+            ? `Depuis un sommet de séance de ${money(peak)}`
+            : 'La séance n\'est jamais passée dans le vert',
         },
         {
-          label: 'Rule breaks',
+          label: 'Entorses aux règles',
           value: String(breaks),
           amber: breaks > 0,
-          read: breaks ? 'Flagged in the review below' : 'Nothing flagged',
+          read: breaks ? 'Signalées dans le bilan ci-dessous' : 'Rien de signalé',
         },
       ]}
     />
@@ -255,8 +255,8 @@ export function DayMeasures({ kpis, trades, summary, allTime }) {
 /* ── coaching: the report, with the lists behind tabs ───────────────────── */
 export function Coaching({ summary, loading, onRegenerate }) {
   const [tab, setTab] = useState('strengths');
-  if (loading) return <div className="v3-empty">Reading the session…</div>;
-  if (!summary) return <div className="v3-empty">No review for this day yet.</div>;
+  if (loading) return <div className="v3-empty">Lecture de la séance…</div>;
+  if (!summary) return <div className="v3-empty">Pas encore de bilan pour ce jour.</div>;
 
   const lists = {
     strengths: summary.strengths || [],
@@ -265,9 +265,9 @@ export function Coaching({ summary, loading, onRegenerate }) {
     patterns: summary.patterns || [],
   };
   const tabs = [
-    { id: 'strengths', label: 'Strengths' },
-    { id: 'mistakes', label: 'Mistakes' },
-    { id: 'focus', label: 'Tomorrow’s focus' },
+    { id: 'strengths', label: 'Points forts' },
+    { id: 'mistakes', label: 'Erreurs' },
+    { id: 'focus', label: 'Focus de demain' },
     { id: 'patterns', label: 'Patterns' },
   ];
   const rows = lists[tab];
@@ -277,11 +277,11 @@ export function Coaching({ summary, loading, onRegenerate }) {
       <div className="v3-sec-head">
         <div>
           <h2 className="v3-h">Coaching</h2>
-          <p className="v3-h-sub">Written against your trades and your diary together, and graded on process</p>
+          <p className="v3-h-sub">Rédigé à partir de vos trades et de votre journal, et noté sur le processus</p>
         </div>
         <div className="v3-acts">
           {onRegenerate && (
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onRegenerate}>Regenerate</button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={onRegenerate}>Régénérer</button>
           )}
         </div>
       </div>
@@ -292,10 +292,10 @@ export function Coaching({ summary, loading, onRegenerate }) {
       </div>
 
       <div style={{ marginTop: 22 }}>
-        <Tabs tabs={tabs} active={tab} onChange={setTab} label="Review detail" />
+        <Tabs tabs={tabs} active={tab} onChange={setTab} label="Détail du bilan" />
         {!rows.length ? (
           <div className="v3-empty">
-            {tab === 'mistakes' ? 'Nothing flagged on this day.' : 'Nothing recorded here.'}
+            {tab === 'mistakes' ? 'Rien de signalé ce jour-là.' : 'Rien d\'enregistré ici.'}
           </div>
         ) : tab === 'patterns' ? (
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
@@ -315,19 +315,19 @@ export function Coaching({ summary, loading, onRegenerate }) {
 
 /* ── the day's trades, with the grade carrying its reason ───────────────── */
 export function DayTrades({ trades, gradeMap, loading, onOpen }) {
-  if (loading) return <div className="v3-empty">Loading…</div>;
-  if (!trades?.length) return <div className="v3-empty">No trades on this day.</div>;
+  if (loading) return <div className="v3-empty">Chargement…</div>;
+  if (!trades?.length) return <div className="v3-empty">Aucun trade ce jour-là.</div>;
   return (
     <div className="v3-scroll">
       <table className="v3-t">
         <thead>
           <tr>
-            <th>Ticker</th>
-            <th className="v3-hide-s">Side</th>
-            <th className="v3-hide-s">Strategy</th>
-            <th>Grade</th>
+            <th>Symbole</th>
+            <th className="v3-hide-s">Côté</th>
+            <th className="v3-hide-s">Stratégie</th>
+            <th>Note</th>
             <th className="r v3-hide-s">MFE / MAE</th>
-            <th className="r v3-hide-s">Captured</th>
+            <th className="r v3-hide-s">Capturé</th>
             <th className="r">R</th>
             <th className="r">P&amp;L</th>
           </tr>
@@ -344,7 +344,7 @@ export function DayTrades({ trades, gradeMap, loading, onOpen }) {
                 tabIndex={0}
                 onClick={open}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } }}
-                aria-label={`Open ${t.ticker} trade`}
+                aria-label={`Ouvrir le trade ${t.ticker}`}
               >
                 <td>
                   <div className="v3-tick">{t.ticker}</div>
@@ -353,7 +353,7 @@ export function DayTrades({ trades, gradeMap, loading, onOpen }) {
                 <td className="v3-hide-s v3-side">
                   {t.side === 'LONG' ? 'Long' : t.side === 'SHORT' ? 'Short' : t.side}
                 </td>
-                <td className="v3-hide-s v3-read">{t.strategy || 'not set'}</td>
+                <td className="v3-hide-s v3-read">{t.strategy || 'non défini'}</td>
                 <td onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                   {g ? <Grade grade={g.grade} reason={g.one_line} /> : <span className="v3-flat">&mdash;</span>}
                 </td>

@@ -17,10 +17,10 @@ const fmtPnl = (v) => {
 };
 const signedPnl = (v) => (Number(v) > 0 ? '+' : '') + fmtPnl(v);
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+const MONTHS_SHORT = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin',
+  'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
 
 function getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
 function getFirstDayOfMonth(year, month) {
@@ -31,9 +31,9 @@ const pad = (n) => String(n).padStart(2, '0');
 
 function ViewToggle({ view, setView }) {
   return (
-    <div className="seg" role="group" aria-label="Calendar view">
-      <button type="button" className="seg-btn" aria-pressed={view === 'month'} onClick={() => setView('month')}>Month</button>
-      <button type="button" className="seg-btn" aria-pressed={view === 'year'} onClick={() => setView('year')}>Year</button>
+    <div className="seg" role="group" aria-label="Vue du calendrier">
+      <button type="button" className="seg-btn" aria-pressed={view === 'month'} onClick={() => setView('month')}>Mois</button>
+      <button type="button" className="seg-btn" aria-pressed={view === 'year'} onClick={() => setView('year')}>Année</button>
     </div>
   );
 }
@@ -44,18 +44,18 @@ function MonthCard({ data, monthIdx, year, onClick, isCurrent, isFuture }) {
   const name = MONTHS_SHORT[monthIdx];
   if (isFuture) {
     return (
-      <div className="month-card" style={{ opacity: 0.45 }} aria-label={`${MONTHS[monthIdx]} ${year}, upcoming`}>
+      <div className="month-card" style={{ opacity: 0.45 }} aria-label={`${MONTHS[monthIdx]} ${year}, à venir`}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>{name}</div>
-        <div style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginTop: 'auto' }}>Upcoming</div>
+        <div style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginTop: 'auto' }}>À venir</div>
       </div>
     );
   }
 
   if (!data || !data.has_data) {
     return (
-      <div className="month-card" aria-label={`${MONTHS[monthIdx]} ${year}, no trades`}>
+      <div className="month-card" aria-label={`${MONTHS[monthIdx]} ${year}, aucun trade`}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>{name}</div>
-        <div style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginTop: 'auto' }}>No trades</div>
+        <div style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginTop: 'auto' }}>Aucun trade</div>
       </div>
     );
   }
@@ -70,7 +70,7 @@ function MonthCard({ data, monthIdx, year, onClick, isCurrent, isFuture }) {
       type="button"
       className={`month-card${isCurrent ? ' current' : ''}`}
       onClick={() => onClick(monthIdx + 1)}
-      aria-label={`${MONTHS[monthIdx]} ${year}: ${signedPnl(data.net_pnl)}, ${data.total_trades} trades. Open month`}
+      aria-label={`${MONTHS[monthIdx]} ${year} : ${signedPnl(data.net_pnl)}, ${data.total_trades} trades. Ouvrir le mois`}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: 8 }}>
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>{name}</span>
@@ -81,22 +81,22 @@ function MonthCard({ data, monthIdx, year, onClick, isCurrent, isFuture }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, width: '100%' }}>
         <div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Win %</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Taux %</div>
           <div className={`num ${wrTone}`} style={{ fontSize: 15, fontWeight: 600 }}>{data.win_rate.toFixed(1)}%</div>
         </div>
         <div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Prof. F</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Fact. P</div>
           <div className={`num ${pfTone}`} style={{ fontSize: 15, fontWeight: 600 }}>{data.profit_factor == null ? '∞' : data.profit_factor.toFixed(2)}</div>
         </div>
         <div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Avg W/L</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Moy G/P</div>
           <div className="num" style={{ fontSize: 15, fontWeight: 600 }}>{ratio}</div>
         </div>
       </div>
 
       <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 12.5, color: 'var(--text-secondary)' }}>
         <span><span className="num">{data.total_trades}</span> trades</span>
-        <span><span className="num">{data.trading_days}</span> days</span>
+        <span><span className="num">{data.trading_days}</span> jours</span>
       </div>
     </button>
   );
@@ -129,19 +129,19 @@ function YearView({ year, setYear, accountId, onMonthClick, view, setView }) {
     <div>
       <PageHeader
         title={<span className="num">{year}</span>}
-        subtitle="Year view. Select a month to open it."
+        subtitle="Vue annuelle. Sélectionne un mois pour l'ouvrir."
         actions={<>
-          <button type="button" className="cal-nav" onClick={() => setYear(y => y - 1)} aria-label="Previous year"><ChevronLeft size={18} /></button>
-          <button type="button" className="cal-nav" onClick={() => setYear(y => y + 1)} aria-label="Next year"><ChevronRight size={18} /></button>
-          <button type="button" className="btn btn-secondary" onClick={() => setYear(currentYear)}>This year</button>
+          <button type="button" className="cal-nav" onClick={() => setYear(y => y - 1)} aria-label="Année précédente"><ChevronLeft size={18} /></button>
+          <button type="button" className="cal-nav" onClick={() => setYear(y => y + 1)} aria-label="Année suivante"><ChevronRight size={18} /></button>
+          <button type="button" className="btn btn-secondary" onClick={() => setYear(currentYear)}>Cette année</button>
           <ViewToggle view={view} setView={setView} />
         </>}
       />
 
       {monthsWithData.length > 0 && (
-        <KpiStrip label="Year summary">
-          <KpiCell label="YTD P&L" value={<span className="num">{signedPnl(yearPnl)}</span>} tone={yearPnl > 0 ? 'pos' : yearPnl < 0 ? 'neg' : undefined} />
-          <KpiCell label="Win %" value={<span className="num">{yearWinRate !== '--' ? `${yearWinRate}%` : '--'}</span>} tone={Number(yearWinRate) >= 55 ? 'pos' : undefined} />
+        <KpiStrip label="Résumé de l'année">
+          <KpiCell label="P&L cumulé" value={<span className="num">{signedPnl(yearPnl)}</span>} tone={yearPnl > 0 ? 'pos' : yearPnl < 0 ? 'neg' : undefined} />
+          <KpiCell label="Taux %" value={<span className="num">{yearWinRate !== '--' ? `${yearWinRate}%` : '--'}</span>} tone={Number(yearWinRate) >= 55 ? 'pos' : undefined} />
           <KpiCell label="Trades" value={<span className="num">{totalTrades.toLocaleString('en-US')}</span>} />
         </KpiStrip>
       )}
@@ -229,39 +229,39 @@ function MonthView({ year, month, setYear, setMonth, accountId, onDayClick, view
     <div>
       <PageHeader
         title={<>{MONTHS[month - 1]} <span className="num">{year}</span></>}
-        subtitle="Select a trading day to open its Day Review."
+        subtitle="Sélectionne un jour de trading pour ouvrir son Bilan du jour."
         actions={<>
-          <button type="button" className="cal-nav" onClick={prevMonth} aria-label="Previous month"><ChevronLeft size={18} /></button>
-          <button type="button" className="cal-nav" onClick={nextMonth} aria-label="Next month"><ChevronRight size={18} /></button>
-          <button type="button" className="btn btn-secondary" onClick={goToday}>This month</button>
+          <button type="button" className="cal-nav" onClick={prevMonth} aria-label="Mois précédent"><ChevronLeft size={18} /></button>
+          <button type="button" className="cal-nav" onClick={nextMonth} aria-label="Mois suivant"><ChevronRight size={18} /></button>
+          <button type="button" className="btn btn-secondary" onClick={goToday}>Ce mois</button>
           <ViewToggle view={view} setView={setView} />
         </>}
       />
 
-      <KpiStrip label="Month summary">
-        <KpiCell label="MTD P&L" value={<span className="num">{signedPnl(monthPnl)}</span>} tone={monthPnl > 0 ? 'pos' : monthPnl < 0 ? 'neg' : undefined} />
+      <KpiStrip label="Résumé du mois">
+        <KpiCell label="P&L du mois" value={<span className="num">{signedPnl(monthPnl)}</span>} tone={monthPnl > 0 ? 'pos' : monthPnl < 0 ? 'neg' : undefined} />
         <KpiCell
-          label="Win %"
+          label="Taux %"
           value={<span className="num">{monthKpis ? `${Number(monthKpis.win_rate || 0).toFixed(1)}%` : '--'}</span>}
           tone={monthKpis && monthKpis.win_rate >= 55 ? 'pos' : undefined}
         />
         <KpiCell
-          label="Prof. Factor"
+          label="Fact. profit"
           value={<span className={`num ${monthKpis && pf != null && pf >= 1 && pf < 1.5 ? 'text-purple' : ''}`}>{monthKpis ? (pf == null ? '∞' : Number(pf).toFixed(2)) : '--'}</span>}
           tone={pfTone}
         />
         <KpiCell
-          label="Avg W/L"
+          label="Moy G/P"
           value={<span className="num">{monthKpis && Math.abs(monthKpis.avg_loss || 0) > 0
             ? (Math.abs(monthKpis.avg_win || 0) / Math.abs(monthKpis.avg_loss)).toFixed(2)
             : '--'}</span>}
         />
-        <KpiCell label="Trading days" value={<span className="num">{tradingDays}</span>} />
+        <KpiCell label="Jours de trading" value={<span className="num">{tradingDays}</span>} />
       </KpiStrip>
 
       <section className="card">
         {loading ? (
-          <div className="empty" role="status">Loading...</div>
+          <div className="empty" role="status">Chargement...</div>
         ) : (
           <CalendarGrid weeks={weeks} dayData={dayData} year={year} month={month} onDayClick={onDayClick} size="full" />
         )}
@@ -292,8 +292,8 @@ export default function Calendar({ accountId, onDayClick }) {
       <section className="v3-band" style={{ borderBottom: 0 }}>
         <div className="v3-sec-head">
           <div>
-            <h2 className="v3-h">The year behind it</h2>
-            <p className="v3-h-sub">Each month closing where the next one opens</p>
+            <h2 className="v3-h">L'année écoulée</h2>
+            <p className="v3-h-sub">Chaque mois se clôture là où le suivant s'ouvre</p>
           </div>
         </div>
         <YearBehind accountId={accountId} />

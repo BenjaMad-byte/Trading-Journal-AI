@@ -71,8 +71,8 @@ export function computeStats(trade) {
     const months = Math.floor(days / 30);
     days = days % 30;
     const parts = [];
-    if (months > 0) parts.push(`${months}mo`);
-    if (months > 0 || days > 0) parts.push(`${days}d`);
+    if (months > 0) parts.push(`${months}mois`);
+    if (months > 0 || days > 0) parts.push(`${days}j`);
     parts.push(`${hrs}h`);
     parts.push(`${mins}m`);
     return parts.join(' ');
@@ -128,13 +128,17 @@ function EditTextarea({ label, value, onChange }) {
   );
 }
 
-const EMOTIONAL_STATES = ['Focused', 'Confident', 'Calm', 'Anxious', 'FOMO', 'Frustrated', 'Greedy', 'Fearful', 'Undisciplined', 'Overconfident'];
-const DEFAULT_SOURCES   = ['Watchlist', 'Scanner', 'Alert', 'News', 'Social Media', 'Own Research'];
+const EMOTIONAL_STATES = ['Concentré', 'Confiant', 'Calme', 'Anxieux', 'FOMO', 'Frustré', 'Avide', 'Craintif', 'Indiscipliné', 'Trop confiant'];
+const DEFAULT_SOURCES   = ['Watchlist', 'Scanner', 'Alerte', 'Actualités', 'Réseaux sociaux', 'Recherche personnelle'];
 const TAG_TYPES = ['strategy', 'setup', 'execution', 'mistake', 'emotion', 'outcome', 'source'];
+const TAG_TYPE_LABELS = {
+  strategy: 'Stratégie', setup: 'Setup', execution: 'Exécution',
+  mistake: 'Erreur', emotion: 'Émotion', outcome: 'Résultat', source: 'Source',
+};
 
 // ── Dropdown with add-new option ──────────────────────────────────────────────
 
-function SelectWithAdd({ value, onChange, options, placeholder = 'Select', label }) {
+function SelectWithAdd({ value, onChange, options, placeholder = 'Sélectionner', label }) {
   const [adding, setAdding] = useState(false);
   const [newVal, setNewVal] = useState('');
 
@@ -158,12 +162,12 @@ function SelectWithAdd({ value, onChange, options, placeholder = 'Select', label
           value={newVal}
           onChange={e => setNewVal(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewVal(''); } }}
-          placeholder="Type new value…"
-          aria-label={label ? `New ${label.toLowerCase()}` : 'New value'}
+          placeholder="Saisir une nouvelle valeur…"
+          aria-label={label ? `Nouveau : ${label}` : 'Nouvelle valeur'}
           style={{ ...inputStyle, flex: 1 }}
         />
-        <button type="button" onClick={handleAdd} className="btn btn-primary btn-sm">Add</button>
-        <button type="button" onClick={() => { setAdding(false); setNewVal(''); }} className="btn btn-ghost btn-sm" aria-label="Cancel new value">✕</button>
+        <button type="button" onClick={handleAdd} className="btn btn-primary btn-sm">Ajouter</button>
+        <button type="button" onClick={() => { setAdding(false); setNewVal(''); }} className="btn btn-ghost btn-sm" aria-label="Annuler la nouvelle valeur">✕</button>
       </div>
     );
   }
@@ -177,7 +181,7 @@ function SelectWithAdd({ value, onChange, options, placeholder = 'Select', label
     >
       <option value="">{placeholder}</option>
       {merged.map(o => <option key={o} value={o}>{o}</option>)}
-      <option value="__add__">+ Add new…</option>
+      <option value="__add__">+ Ajouter…</option>
     </select>
   );
 }
@@ -195,10 +199,10 @@ const TAG_CLASS = {
 
 function TagBadge({ tag, onDelete }) {
   return (
-    <span className={`chip ${TAG_CLASS[tag.tag_type] || ''}`} title={tag.tag_type} style={{ fontSize: 13, padding: onDelete ? '2px 4px 2px 10px' : '3px 10px' }}>
+    <span className={`chip ${TAG_CLASS[tag.tag_type] || ''}`} title={TAG_TYPE_LABELS[tag.tag_type] || tag.tag_type} style={{ fontSize: 13, padding: onDelete ? '2px 4px 2px 10px' : '3px 10px' }}>
       {tag.tag_value}
       {onDelete && (
-        <button type="button" onClick={onDelete} aria-label={`Remove tag ${tag.tag_value}`} title="Remove"
+        <button type="button" onClick={onDelete} aria-label={`Retirer le tag ${tag.tag_value}`} title="Retirer"
           style={{ background: 'none', border: 'none', color: 'inherit', opacity: 0.75, padding: '0 4px', lineHeight: 1, fontSize: 16, display: 'flex', alignItems: 'center' }}>
           ×
         </button>
@@ -210,13 +214,14 @@ function TagBadge({ tag, onDelete }) {
 // ── What If helpers ───────────────────────────────────────────────────────────
 
 const TABS = ['Stats', 'Strategy', 'Tags', 'Executions', 'What If'];
+const TAB_LABELS = { Stats: 'Stats', Strategy: 'Stratégie', Tags: 'Tags', Executions: 'Exécutions', 'What If': 'Et si' };
 
 const SCENARIOS = [
-  { label: '+5 min',    offsetMin: 5 },
-  { label: '+10 min',   offsetMin: 10 },
-  { label: '+30 min',   offsetMin: 30 },
-  { label: '+1 hour',   offsetMin: 60 },
-  { label: 'End of day', offsetMin: null },
+  { label: '+5 min',     offsetMin: 5 },
+  { label: '+10 min',    offsetMin: 10 },
+  { label: '+30 min',    offsetMin: 30 },
+  { label: '+1 heure',   offsetMin: 60 },
+  { label: 'Fin de journée', offsetMin: null },
 ];
 
 function getPriceAt(bars, hhmm) {
@@ -277,9 +282,9 @@ function DaySidebar({ currentTrade, onOpenDetail }) {
   const dayPnl = dayTrades.reduce((s, t) => s + (t.net_pnl || 0), 0);
 
   return (
-    <section className="card panel-flush" aria-label="This session">
+    <section className="card panel-flush" aria-label="Cette séance">
       <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid var(--divider-soft)' }}>
-        <h2 className="section-title" style={{ fontSize: 17 }}>This session</h2>
+        <h2 className="section-title" style={{ fontSize: 17 }}>Cette séance</h2>
         <div className="num text-muted" style={{ fontSize: 13, marginTop: 2 }}>{currentTrade.date}</div>
       </div>
       <div style={{ overflowY: 'auto', maxHeight: 560 }}>
@@ -304,8 +309,8 @@ function DaySidebar({ currentTrade, onOpenDetail }) {
               </div>
               {(openT || closeT) && (
                 <div className="num text-muted" style={{ fontSize: 12.5, marginTop: 2 }}>
-                  {openT}{closeT && openT !== closeT ? ` to ${closeT}` : ''}
-                  {isActive && <span className="text-purple" style={{ marginLeft: 6 }}>Selected</span>}
+                  {openT}{closeT && openT !== closeT ? ` à ${closeT}` : ''}
+                  {isActive && <span className="text-purple" style={{ marginLeft: 6 }}>Sélectionné</span>}
                 </div>
               )}
             </button>
@@ -313,7 +318,7 @@ function DaySidebar({ currentTrade, onOpenDetail }) {
         })}
       </div>
       <div style={{ padding: '14px 16px', borderTop: '1px solid var(--divider-soft)' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Day net P&L · <span className="num">{dayTrades.length}</span> trades</div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>P&L net du jour · <span className="num">{dayTrades.length}</span> trades</div>
         <div className={`num ${dayPnl >= 0 ? 'pos' : 'neg'}`} style={{ fontSize: 22, fontWeight: 600, fontFamily: 'var(--font-display)', lineHeight: 1.2, marginTop: 2 }}>
           {dayPnl >= 0 ? '+' : '-'}${Math.abs(dayPnl).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
@@ -537,7 +542,7 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
       {/* Back nav + prev/next */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <button type="button" onClick={onBack} className="btn btn-ghost" style={{ paddingLeft: 8 }}>
-          <ArrowLeft size={16} /> Back to trades
+          <ArrowLeft size={16} /> Retour aux trades
         </button>
       </div>
 
@@ -547,9 +552,9 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
           <span className="num">{trade.date}</span>
           {' / '}{trade.instrument_type ? trade.instrument_type.charAt(0) + trade.instrument_type.slice(1).toLowerCase() : 'Stock'}
           {' / '}{trade.side === 'LONG' ? 'Long' : trade.side === 'SHORT' ? 'Short' : trade.side}
-          {stats.openTime && <> · Opened <span className="num">{stats.openTime.slice(0, 5)}</span></>}
-          {stats.closeTime && stats.isClosed && <> · Closed <span className="num">{stats.closeTime.slice(0, 5)}</span></>}
-          {stats.holdMinutes != null && <> · Held <span className="num">{stats.fmtHold(stats.holdMinutes)}</span></>}
+          {stats.openTime && <> · Ouvert <span className="num">{stats.openTime.slice(0, 5)}</span></>}
+          {stats.closeTime && stats.isClosed && <> · Clôturé <span className="num">{stats.closeTime.slice(0, 5)}</span></>}
+          {stats.holdMinutes != null && <> · Détenu <span className="num">{stats.fmtHold(stats.holdMinutes)}</span></>}
         </>}
         actions={tradeNavList.length > 1 ? <>
           <button
@@ -557,9 +562,9 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
             className="btn btn-secondary"
             onClick={() => goTo(navIdx - 1)}
             disabled={!hasPrev}
-            title="Previous trade"
+            title="Trade précédent"
           >
-            <ChevronLeft size={16} /> Previous trade
+            <ChevronLeft size={16} /> Trade précédent
           </button>
           <span className="num text-muted" style={{ fontSize: 13, minWidth: 54, textAlign: 'center' }} aria-live="polite">
             {navIdx + 1} / {tradeNavList.length}
@@ -569,42 +574,42 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
             className="btn btn-secondary"
             onClick={() => goTo(navIdx + 1)}
             disabled={!hasNext}
-            title="Next trade"
+            title="Trade suivant"
           >
-            Next trade <ChevronRight size={16} />
+            Trade suivant <ChevronRight size={16} />
           </button>
         </> : null}
       >
         <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
           <span className="chip">{trade.side}</span>
-          <span className="chip">{stats.isClosed ? 'Closed' : 'Open'}</span>
+          <span className="chip">{stats.isClosed ? 'Fermé' : 'Ouvert'}</span>
           {stats.isClosed && (
-            <span className={`chip ${stats.isWin ? 'pos' : 'neg'}`}>{stats.isWin ? 'Win' : 'Loss'}</span>
+            <span className={`chip ${stats.isWin ? 'pos' : 'neg'}`}>{stats.isWin ? 'Gain' : 'Perte'}</span>
           )}
         </div>
       </PageHeader>
 
-      <KpiStrip label="Trade metrics">
+      <KpiStrip label="Métriques du trade">
         <KpiCell
-          label="Net P&L"
+          label="P&L net"
           value={<MoneyValue value={pnl} />}
           tone={pnl >= 0 ? 'pos' : 'neg'}
           foot={<>
             {stats.netRoi != null && <>ROI <span className={`num ${stats.netRoi >= 0 ? 'pos' : 'neg'}`}>{stats.netRoi >= 0 ? '+' : ''}{stats.netRoi.toFixed(2)}%</span></>}
             {stats.netRoi != null && trade.gross_pnl != null && ' · '}
-            {trade.gross_pnl != null && <>Gross <span className="num">{fmtSigned$(trade.gross_pnl)}</span></>}
+            {trade.gross_pnl != null && <>Brut <span className="num">{fmtSigned$(trade.gross_pnl)}</span></>}
           </>}
         />
         <KpiCell
-          label="Realized R"
-          value={<span className="num">{realizedR ? `${analysis.r_multiple > 0 ? '+' : ''}${realizedR}` : 'n/a'}</span>}
+          label="R réalisé"
+          value={<span className="num">{realizedR ? `${analysis.r_multiple > 0 ? '+' : ''}${realizedR}` : 'n/d'}</span>}
           tone={analysis?.r_multiple != null ? (analysis.r_multiple >= 0 ? 'pos' : 'neg') : undefined}
-          foot={plannedR ? <>Planned <span className="num">{plannedR}</span></> : null}
+          foot={plannedR ? <>Prévu <span className="num">{plannedR}</span></> : null}
         />
-        <KpiCell label="Avg entry" value={<span className="num">{stats.avgEntry ? `$${stats.avgEntry.toFixed(2)}` : 'n/a'}</span>} />
-        <KpiCell label="Avg exit" value={<span className="num">{stats.avgExit ? `$${stats.avgExit.toFixed(2)}` : 'n/a'}</span>} />
-        <KpiCell label="Quantity" value={<span className="num">{stats.totalQty || 'n/a'}</span>} foot={trade.commissions ? <>Comm <span className="num">{fmt$(trade.commissions)}</span></> : null} />
-        <KpiCell label="Risk" value={<span className="num">{tradeRisk ? fmt$(tradeRisk) : 'n/a'}</span>} />
+        <KpiCell label="Entrée moy." value={<span className="num">{stats.avgEntry ? `$${stats.avgEntry.toFixed(2)}` : 'n/d'}</span>} />
+        <KpiCell label="Sortie moy." value={<span className="num">{stats.avgExit ? `$${stats.avgExit.toFixed(2)}` : 'n/d'}</span>} />
+        <KpiCell label="Quantité" value={<span className="num">{stats.totalQty || 'n/d'}</span>} foot={trade.commissions ? <>Comm. <span className="num">{fmt$(trade.commissions)}</span></> : null} />
+        <KpiCell label="Risque" value={<span className="num">{tradeRisk ? fmt$(tradeRisk) : 'n/d'}</span>} />
       </KpiStrip>
 
       {/* Layout: session list | chart, then tabs beside notes */}
@@ -627,9 +632,9 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
 
           <div className="td-lower">
         {/* Middle: tabs + content */}
-        <section className="card panel-flush" aria-label="Trade review">
+        <section className="card panel-flush" aria-label="Revue du trade">
           {/* Tab bar */}
-          <div className="tabs" role="tablist" aria-label="Trade review sections" style={{ padding: '0 12px' }}>
+          <div className="tabs" role="tablist" aria-label="Sections de la revue du trade" style={{ padding: '0 12px' }}>
             {TABS.map(t => (
               <button
                 type="button"
@@ -647,7 +652,7 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                   if (e.key === 'ArrowLeft') setTab(TABS[(i - 1 + TABS.length) % TABS.length]);
                 }}
               >
-                {t}
+                {TAB_LABELS[t] || t}
               </button>
             ))}
           </div>
@@ -673,83 +678,83 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                       className="btn btn-ghost btn-sm"
                       type="button"
                     >
-                      <Pencil size={13} /> Edit
+                      <Pencil size={13} /> Modifier
                     </button>
                   ) : (
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button type="button" onClick={handleSaveStats} disabled={savingStats} className="btn btn-primary btn-sm">{savingStats ? 'Saving…' : 'Save'}</button>
-                      <button type="button" onClick={() => setEditingStats(false)} className="btn btn-ghost btn-sm">Cancel</button>
+                      <button type="button" onClick={handleSaveStats} disabled={savingStats} className="btn btn-primary btn-sm">{savingStats ? 'Enregistrement…' : 'Enregistrer'}</button>
+                      <button type="button" onClick={() => setEditingStats(false)} className="btn btn-ghost btn-sm">Annuler</button>
                     </div>
                   )}
                 </div>
 
-                <StatRow label="Side" value={trade.side} />
-                <StatRow label="Stocks traded" value={stats.totalQty || '—'} />
-                <StatRow label="Commissions & Fees" value={trade.commissions ? fmt$(trade.commissions) : '—'} />
-                <StatRow label="Net ROI" value={stats.netRoi != null ? `${stats.netRoi >= 0 ? '+' : ''}${stats.netRoi.toFixed(2)}%` : '—'} valueColor={stats.netRoi != null ? (stats.netRoi >= 0 ? 'var(--green)' : 'var(--red)') : undefined} />
-                <StatRow label="Gross P&L" value={trade.gross_pnl != null ? fmt$(trade.gross_pnl) : '—'} valueColor={trade.gross_pnl >= 0 ? 'var(--green)' : 'var(--red)'} />
-                <StatRow label="Adjusted Cost" value={stats.adjustedCost ? fmt$(stats.adjustedCost) : '—'} />
-                <StatRow label="Average Entry" value={stats.avgEntry ? `$${stats.avgEntry.toFixed(2)}` : '—'} />
-                <StatRow label="Average Exit" value={stats.avgExit ? `$${stats.avgExit.toFixed(2)}` : '—'} />
-                <StatRow label="Entry Time" value={stats.openTime ? `${stats.openDate ? stats.openDate + ' ' : ''}${stats.openTime.slice(0, 5)}` : '—'} />
-                <StatRow label="Exit Time" value={(stats.isClosed && stats.closeTime) ? `${stats.closeDate ? stats.closeDate + ' ' : ''}${stats.closeTime.slice(0, 5)}` : '—'} />
-                <StatRow label="Hold Time" value={stats.fmtHold(stats.holdMinutes)} />
+                <StatRow label="Sens" value={trade.side} />
+                <StatRow label="Titres échangés" value={stats.totalQty || '—'} />
+                <StatRow label="Commissions et frais" value={trade.commissions ? fmt$(trade.commissions) : '—'} />
+                <StatRow label="ROI net" value={stats.netRoi != null ? `${stats.netRoi >= 0 ? '+' : ''}${stats.netRoi.toFixed(2)}%` : '—'} valueColor={stats.netRoi != null ? (stats.netRoi >= 0 ? 'var(--green)' : 'var(--red)') : undefined} />
+                <StatRow label="P&L brut" value={trade.gross_pnl != null ? fmt$(trade.gross_pnl) : '—'} valueColor={trade.gross_pnl >= 0 ? 'var(--green)' : 'var(--red)'} />
+                <StatRow label="Coût ajusté" value={stats.adjustedCost ? fmt$(stats.adjustedCost) : '—'} />
+                <StatRow label="Entrée moyenne" value={stats.avgEntry ? `$${stats.avgEntry.toFixed(2)}` : '—'} />
+                <StatRow label="Sortie moyenne" value={stats.avgExit ? `$${stats.avgExit.toFixed(2)}` : '—'} />
+                <StatRow label="Heure d'entrée" value={stats.openTime ? `${stats.openDate ? stats.openDate + ' ' : ''}${stats.openTime.slice(0, 5)}` : '—'} />
+                <StatRow label="Heure de sortie" value={(stats.isClosed && stats.closeTime) ? `${stats.closeDate ? stats.closeDate + ' ' : ''}${stats.closeTime.slice(0, 5)}` : '—'} />
+                <StatRow label="Durée de détention" value={stats.fmtHold(stats.holdMinutes)} />
 
                 {editingStats ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--divider)' }}>
                     <div>
-                      <div className="field-label" style={{ marginBottom: 4 }}>Strategy</div>
+                      <div className="field-label" style={{ marginBottom: 4 }}>Stratégie</div>
                       <SelectWithAdd
                         value={statsForm.strategy}
                         onChange={v => setStatsForm(f => ({ ...f, strategy: v }))}
                         options={analysisOptions.strategies}
-                        label="Strategy"
-                        placeholder="Select strategy"
+                        label="Stratégie"
+                        placeholder="Sélectionner une stratégie"
                       />
                     </div>
                     <div>
-                      <div className="field-label" style={{ marginBottom: 4 }}>Source (idea origin)</div>
+                      <div className="field-label" style={{ marginBottom: 4 }}>Source (origine de l'idée)</div>
                       <SelectWithAdd
                         value={statsForm.idea_source}
                         onChange={v => setStatsForm(f => ({ ...f, idea_source: v }))}
                         options={[...new Set([...DEFAULT_SOURCES, ...analysisOptions.idea_sources])]}
                         label="Source"
-                        placeholder="Select source"
+                        placeholder="Sélectionner une source"
                       />
                     </div>
-                    <EditField label="Stop Loss ($)" type="number" value={String(statsForm.stop_loss)} onChange={v => setStatsForm(f => ({ ...f, stop_loss: v }))} />
-                    <EditField label="Profit Target ($)" type="number" value={String(statsForm.target_price)} onChange={v => setStatsForm(f => ({ ...f, target_price: v }))} />
-                    <EditField label="Emotional State" value={statsForm.emotional_state} onChange={v => setStatsForm(f => ({ ...f, emotional_state: v }))} options={EMOTIONAL_STATES} />
+                    <EditField label="Stop loss ($)" type="number" value={String(statsForm.stop_loss)} onChange={v => setStatsForm(f => ({ ...f, stop_loss: v }))} />
+                    <EditField label="Objectif de profit ($)" type="number" value={String(statsForm.target_price)} onChange={v => setStatsForm(f => ({ ...f, target_price: v }))} />
+                    <EditField label="État émotionnel" value={statsForm.emotional_state} onChange={v => setStatsForm(f => ({ ...f, emotional_state: v }))} options={EMOTIONAL_STATES} />
                   </div>
                 ) : analysis && (
                   <>
-                    <StatRow label="Strategy" value={analysis.strategy} valueColor="var(--accent-line)" />
+                    <StatRow label="Stratégie" value={analysis.strategy} valueColor="var(--accent-line)" />
                     <StatRow label="Source" value={analysis.idea_source} valueColor="var(--text-secondary)" />
-                    <StatRow label="Stop Loss" value={analysis.stop_loss ? `$${analysis.stop_loss}` : null} valueColor="var(--caution)" />
-                    <StatRow label="Profit Target" value={analysis.target_price ? `$${analysis.target_price}` : null} valueColor="var(--accent-line)" />
-                    <StatRow label="Trade Risk" value={tradeRisk ? fmt$(tradeRisk) : (analysis.risk_per_trade ? fmt$(-Math.abs(analysis.risk_per_trade)) : null)} valueColor="var(--caution)" />
-                    <StatRow label="Planned R-Multiple" value={plannedR} />
-                    <StatRow label="Realized R-Multiple" value={realizedR} valueColor={analysis?.r_multiple >= 0 ? 'var(--green)' : 'var(--red)'} />
+                    <StatRow label="Stop loss" value={analysis.stop_loss ? `$${analysis.stop_loss}` : null} valueColor="var(--caution)" />
+                    <StatRow label="Objectif de profit" value={analysis.target_price ? `$${analysis.target_price}` : null} valueColor="var(--accent-line)" />
+                    <StatRow label="Risque du trade" value={tradeRisk ? fmt$(tradeRisk) : (analysis.risk_per_trade ? fmt$(-Math.abs(analysis.risk_per_trade)) : null)} valueColor="var(--caution)" />
+                    <StatRow label="Multiple R prévu" value={plannedR} />
+                    <StatRow label="Multiple R réalisé" value={realizedR} valueColor={analysis?.r_multiple >= 0 ? 'var(--green)' : 'var(--red)'} />
                     {/* Excursion: how far the trade went your way and against you,
                         and how much of the favourable move you actually kept. */}
                     <StatRow
-                      label="Max Favourable (MFE)"
+                      label="Favorable max (MFE)"
                       value={trade.mfe_pct == null ? null : `+${Number(trade.mfe_pct).toFixed(2)}%`}
                       valueColor="var(--result-pos)"
                     />
                     <StatRow
-                      label="Max Adverse (MAE)"
+                      label="Adverse max (MAE)"
                       value={trade.mae_pct == null ? null : `${Number(trade.mae_pct).toFixed(2)}%`}
                       valueColor="var(--result-neg)"
                     />
                     <StatRow
-                      label="Exit Efficiency"
+                      label="Efficacité de sortie"
                       value={trade.exit_efficiency == null ? null : `${Number(trade.exit_efficiency).toFixed(1)}%`}
                       valueColor={trade.exit_efficiency == null ? undefined
                         : trade.exit_efficiency < 0 ? 'var(--result-neg)'
                           : trade.exit_efficiency >= 50 ? 'var(--result-pos)' : 'var(--caution)'}
                     />
-                    <StatRow label="Emotional State" value={analysis.emotional_state} />
+                    <StatRow label="État émotionnel" value={analysis.emotional_state} />
                   </>
                 )}
               </div>
@@ -772,40 +777,40 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                       className="btn btn-ghost btn-sm"
                       type="button"
                     >
-                      <Pencil size={13} /> Edit
+                      <Pencil size={13} /> Modifier
                     </button>
                   ) : (
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button type="button" onClick={handleSaveStrategy} disabled={savingStrategy} className="btn btn-primary btn-sm">{savingStrategy ? 'Saving…' : 'Save'}</button>
-                      <button type="button" onClick={() => setEditingStrategy(false)} className="btn btn-ghost btn-sm">Cancel</button>
+                      <button type="button" onClick={handleSaveStrategy} disabled={savingStrategy} className="btn btn-primary btn-sm">{savingStrategy ? 'Enregistrement…' : 'Enregistrer'}</button>
+                      <button type="button" onClick={() => setEditingStrategy(false)} className="btn btn-ghost btn-sm">Annuler</button>
                     </div>
                   )}
                 </div>
 
                 {editingStrategy ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <EditTextarea label="Entry Reason" value={strategyForm.entry_reason} onChange={v => setStrategyForm(f => ({ ...f, entry_reason: v }))} />
-                    <EditTextarea label="Exit Reason"  value={strategyForm.exit_reason}  onChange={v => setStrategyForm(f => ({ ...f, exit_reason: v }))} />
-                    <EditTextarea label="Mistakes"     value={strategyForm.mistakes}     onChange={v => setStrategyForm(f => ({ ...f, mistakes: v }))} />
+                    <EditTextarea label="Raison d'entrée" value={strategyForm.entry_reason} onChange={v => setStrategyForm(f => ({ ...f, entry_reason: v }))} />
+                    <EditTextarea label="Raison de sortie"  value={strategyForm.exit_reason}  onChange={v => setStrategyForm(f => ({ ...f, exit_reason: v }))} />
+                    <EditTextarea label="Erreurs"     value={strategyForm.mistakes}     onChange={v => setStrategyForm(f => ({ ...f, mistakes: v }))} />
                   </div>
                 ) : (
                   <>
                     {(analysis?.strategy || analysis?.idea_source) && (
                       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                        {analysis?.strategy && <div><div className="field-label" style={{ marginBottom: 4 }}>Strategy</div><div style={{ color: 'var(--accent-line)', fontWeight: 600 }}>{analysis.strategy}</div></div>}
+                        {analysis?.strategy && <div><div className="field-label" style={{ marginBottom: 4 }}>Stratégie</div><div style={{ color: 'var(--accent-line)', fontWeight: 600 }}>{analysis.strategy}</div></div>}
                         {analysis?.idea_source && <div><div className="field-label" style={{ marginBottom: 4 }}>Source</div><div style={{ color: 'var(--text-primary)', fontSize: 14 }}>{analysis.idea_source}</div></div>}
                       </div>
                     )}
-                    {analysis?.entry_reason && <div><div className="field-label" style={{ marginBottom: 4 }}>Entry Reason</div><div style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.entry_reason}</div></div>}
-                    {analysis?.exit_reason  && <div><div className="field-label" style={{ marginBottom: 4 }}>Exit Reason</div><div style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.exit_reason}</div></div>}
-                    {analysis?.mistakes     && <div><div className="field-label" style={{ marginBottom: 4 }}>Mistakes</div><div className="neg" style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.mistakes}</div></div>}
+                    {analysis?.entry_reason && <div><div className="field-label" style={{ marginBottom: 4 }}>Raison d'entrée</div><div style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.entry_reason}</div></div>}
+                    {analysis?.exit_reason  && <div><div className="field-label" style={{ marginBottom: 4 }}>Raison de sortie</div><div style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.exit_reason}</div></div>}
+                    {analysis?.mistakes     && <div><div className="field-label" style={{ marginBottom: 4 }}>Erreurs</div><div className="neg" style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.mistakes}</div></div>}
                     {analysis?.ai_feedback  && (
                       <div className="notice accent">
                         {analysis.ai_feedback}
                       </div>
                     )}
                     {!analysis?.strategy && !analysis?.entry_reason && (
-                      <div className="text-muted" style={{ fontSize: 14 }}>No strategy notes yet. Click Edit to add.</div>
+                      <div className="text-muted" style={{ fontSize: 14 }}>Pas encore de notes de stratégie. Cliquez sur Modifier pour en ajouter.</div>
                     )}
                   </>
                 )}
@@ -824,22 +829,22 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                 )}
                 {!addingTag ? (
                   <button type="button" onClick={() => setAddingTag(true)} className="btn btn-ghost" style={{ color: 'var(--accent-line)', paddingLeft: 6 }}>
-                    <PlusCircle size={15} /> Add Tag
+                    <PlusCircle size={15} /> Ajouter un tag
                   </button>
                 ) : (
                   <div style={editPanelStyle}>
-                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>Add Tag</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>Ajouter un tag</div>
                     <div style={editGridStyle}>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Type</div>
-                        <select aria-label="Tag type" value={tagForm.tag_type} onChange={e => setTagForm(f => ({ ...f, tag_type: e.target.value }))} style={inputStyle}>
-                          {TAG_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        <select aria-label="Type de tag" value={tagForm.tag_type} onChange={e => setTagForm(f => ({ ...f, tag_type: e.target.value }))} style={inputStyle}>
+                          {TAG_TYPES.map(t => <option key={t} value={t}>{TAG_TYPE_LABELS[t] || t}</option>)}
                         </select>
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Value</div>
+                        <div className="field-label" style={{ marginBottom: 4 }}>Valeur</div>
                         <input
-                          type="text" placeholder="tag value" aria-label="Tag value" value={tagForm.tag_value}
+                          type="text" placeholder="valeur du tag" aria-label="Valeur du tag" value={tagForm.tag_value}
                           onChange={e => setTagForm(f => ({ ...f, tag_value: e.target.value }))}
                           onKeyDown={e => e.key === 'Enter' && handleAddTag()}
                           style={inputStyle}
@@ -850,13 +855,13 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                       <div className="notice neg" role="alert" style={{ marginBottom: 10 }}>{tagError}</div>
                     )}
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button type="button" onClick={handleAddTag} disabled={savingTag} className="btn btn-primary btn-sm">{savingTag ? 'Saving…' : 'Add'}</button>
-                      <button type="button" onClick={() => { setAddingTag(false); setTagForm({ tag_type: 'strategy', tag_value: '' }); setTagError(null); }} className="btn btn-ghost btn-sm">Cancel</button>
+                      <button type="button" onClick={handleAddTag} disabled={savingTag} className="btn btn-primary btn-sm">{savingTag ? 'Enregistrement…' : 'Ajouter'}</button>
+                      <button type="button" onClick={() => { setAddingTag(false); setTagForm({ tag_type: 'strategy', tag_value: '' }); setTagError(null); }} className="btn btn-ghost btn-sm">Annuler</button>
                     </div>
                   </div>
                 )}
                 {tags.length === 0 && !addingTag && (
-                  <div className="text-muted" style={{ fontSize: 14, marginTop: 8 }}>No tags yet.</div>
+                  <div className="text-muted" style={{ fontSize: 14, marginTop: 8 }}>Aucun tag pour l'instant.</div>
                 )}
               </div>
             )}
@@ -872,8 +877,8 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                 <table style={{ minWidth: 470 }}>
                   <thead>
                     <tr>
-                      {['Date', 'Time', 'Action', 'Qty', 'Price', 'Comm.', ''].map((h, hi) => (
-                        <th key={h || hi} className={h === 'Date' || h === 'Time' || h === 'Action' ? undefined : 'num'} style={{ paddingLeft: hi === 0 ? 20 : undefined, paddingRight: hi === 6 ? 20 : undefined }}>
+                      {['Date', 'Heure', 'Action', 'Qté', 'Prix', 'Comm.', ''].map((h, hi) => (
+                        <th key={h || hi} className={h === 'Date' || h === 'Heure' || h === 'Action' ? undefined : 'num'} style={{ paddingLeft: hi === 0 ? 20 : undefined, paddingRight: hi === 6 ? 20 : undefined }}>
                           {h || <span className="sr-only">Actions</span>}
                         </th>
                       ))}
@@ -890,19 +895,19 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                         <td className="num mono text-muted" style={{ fontSize: 13.5 }}>{ex.commission ? `$${Number(ex.commission).toFixed(2)}` : '—'}</td>
                         <td className="num" style={{ whiteSpace: 'nowrap', paddingRight: 20 }}>
                           <button
-                            title="Edit"
+                            title="Modifier"
                             onClick={() => {
                               setEditingExecIdx(i);
                               setEditExecForm({ ...ex, qty: String(ex.qty), price: String(ex.price), commission: String(ex.commission || ''), date: ex.date || trade.date, time: ex.time || '' });
                               setShowAddExec(false);
                             }}
                             type="button"
-                            aria-label={`Edit execution ${i + 1}`}
+                            aria-label={`Modifier l'exécution ${i + 1}`}
                             className="btn btn-ghost btn-icon"
                           >
                             <Pencil size={14} />
                           </button>
-                          <button type="button" onClick={() => handleDeleteExecution(i)} title="Delete" aria-label={`Delete execution ${i + 1}`} className="btn btn-ghost btn-icon" style={{ color: 'var(--result-neg)' }}>
+                          <button type="button" onClick={() => handleDeleteExecution(i)} title="Supprimer" aria-label={`Supprimer l'exécution ${i + 1}`} className="btn btn-ghost btn-icon" style={{ color: 'var(--result-neg)' }}>
                             <Trash2 size={14} />
                           </button>
                         </td>
@@ -913,47 +918,47 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                 </div>
 
                 <div className="text-muted" style={{ fontSize: 13, marginTop: 10 }}>
-                  Gross <span className="num">{trade.gross_pnl != null ? fmtSigned$(trade.gross_pnl) : 'n/a'}</span>
+                  Brut <span className="num">{trade.gross_pnl != null ? fmtSigned$(trade.gross_pnl) : 'n/d'}</span>
                   {' · '}Commissions <span className="num">{trade.commissions ? fmt$(trade.commissions) : '$0.00'}</span>
                 </div>
 
                 {/* Edit Execution inline panel */}
                 {editingExecIdx !== null && editExecForm && (
                   <div style={editPanelStyle}>
-                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>Edit Execution #{editingExecIdx + 1}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>Modifier l'exécution n°{editingExecIdx + 1}</div>
                     <div style={editGridStyle}>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Action</div>
-                        <select aria-label="Edit execution action" value={editExecForm.action} onChange={e => setEditExecForm(f => ({ ...f, action: e.target.value }))} style={inputStyle}>
-                          <option value="BOT">BOT (Buy)</option>
-                          <option value="SOLD">SOLD (Sell)</option>
+                        <select aria-label="Modifier l'action de l'exécution" value={editExecForm.action} onChange={e => setEditExecForm(f => ({ ...f, action: e.target.value }))} style={inputStyle}>
+                          <option value="BOT">BOT (Achat)</option>
+                          <option value="SOLD">SOLD (Vente)</option>
                         </select>
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Qty</div>
-                        <input aria-label="Edit execution qty" type="number" min="1" value={editExecForm.qty} onChange={e => setEditExecForm(f => ({ ...f, qty: e.target.value }))} style={inputStyle} />
+                        <div className="field-label" style={{ marginBottom: 4 }}>Qté</div>
+                        <input aria-label="Modifier la quantité de l'exécution" type="number" min="1" value={editExecForm.qty} onChange={e => setEditExecForm(f => ({ ...f, qty: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Price</div>
-                        <input aria-label="Edit execution price" type="number" min="0" step="0.01" value={editExecForm.price} onChange={e => setEditExecForm(f => ({ ...f, price: e.target.value }))} style={inputStyle} />
+                        <div className="field-label" style={{ marginBottom: 4 }}>Prix</div>
+                        <input aria-label="Modifier le prix de l'exécution" type="number" min="0" step="0.01" value={editExecForm.price} onChange={e => setEditExecForm(f => ({ ...f, price: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Commission</div>
-                        <input aria-label="Edit execution commission" type="number" min="0" step="0.01" value={editExecForm.commission} onChange={e => setEditExecForm(f => ({ ...f, commission: e.target.value }))} style={inputStyle} />
+                        <input aria-label="Modifier la commission de l'exécution" type="number" min="0" step="0.01" value={editExecForm.commission} onChange={e => setEditExecForm(f => ({ ...f, commission: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Date</div>
-                        <input aria-label="Edit execution date" type="date" value={editExecForm.date} onChange={e => setEditExecForm(f => ({ ...f, date: e.target.value }))} style={inputStyle} />
+                        <input aria-label="Modifier la date de l'exécution" type="date" value={editExecForm.date} onChange={e => setEditExecForm(f => ({ ...f, date: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Time</div>
-                        <input aria-label="Edit execution time" type="time" value={editExecForm.time} onChange={e => setEditExecForm(f => ({ ...f, time: e.target.value }))} style={inputStyle} />
+                        <div className="field-label" style={{ marginBottom: 4 }}>Heure</div>
+                        <input aria-label="Modifier l'heure de l'exécution" type="time" value={editExecForm.time} onChange={e => setEditExecForm(f => ({ ...f, time: e.target.value }))} style={inputStyle} />
                       </div>
                     </div>
                     {execError && <div className="notice neg" role="alert" style={{ marginBottom: 10 }}>{execError}</div>}
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button type="button" onClick={handleSaveEditExec} disabled={savingEditExec} className="btn btn-primary btn-sm">{savingEditExec ? 'Saving…' : 'Save'}</button>
-                      <button type="button" onClick={() => { setEditingExecIdx(null); setEditExecForm(null); setExecError(null); }} className="btn btn-ghost btn-sm">Cancel</button>
+                      <button type="button" onClick={handleSaveEditExec} disabled={savingEditExec} className="btn btn-primary btn-sm">{savingEditExec ? 'Enregistrement…' : 'Enregistrer'}</button>
+                      <button type="button" onClick={() => { setEditingExecIdx(null); setEditExecForm(null); setExecError(null); }} className="btn btn-ghost btn-sm">Annuler</button>
                     </div>
                   </div>
                 )}
@@ -966,44 +971,44 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
                     className="btn btn-ghost"
                     style={{ marginTop: 12, color: 'var(--accent-line)', paddingLeft: 6 }}
                   >
-                    <PlusCircle size={15} /> Add Execution
+                    <PlusCircle size={15} /> Ajouter une exécution
                   </button>
                 ) : (
                   <div style={editPanelStyle}>
-                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>Add Execution</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>Ajouter une exécution</div>
                     <div style={editGridStyle}>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Action</div>
-                        <select aria-label="New execution action" value={execForm.action} onChange={e => setExecForm(f => ({ ...f, action: e.target.value }))} style={inputStyle}>
-                          <option value="BOT">BOT (Buy)</option>
-                          <option value="SOLD">SOLD (Sell)</option>
+                        <select aria-label="Action de la nouvelle exécution" value={execForm.action} onChange={e => setExecForm(f => ({ ...f, action: e.target.value }))} style={inputStyle}>
+                          <option value="BOT">BOT (Achat)</option>
+                          <option value="SOLD">SOLD (Vente)</option>
                         </select>
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Qty</div>
-                        <input aria-label="New execution qty" type="number" min="1" value={execForm.qty} placeholder="0" onChange={e => setExecForm(f => ({ ...f, qty: e.target.value }))} style={inputStyle} />
+                        <div className="field-label" style={{ marginBottom: 4 }}>Qté</div>
+                        <input aria-label="Quantité de la nouvelle exécution" type="number" min="1" value={execForm.qty} placeholder="0" onChange={e => setExecForm(f => ({ ...f, qty: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Price</div>
-                        <input aria-label="New execution price" type="number" min="0" step="0.01" value={execForm.price} onChange={e => setExecForm(f => ({ ...f, price: e.target.value }))} style={inputStyle} />
+                        <div className="field-label" style={{ marginBottom: 4 }}>Prix</div>
+                        <input aria-label="Prix de la nouvelle exécution" type="number" min="0" step="0.01" value={execForm.price} onChange={e => setExecForm(f => ({ ...f, price: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Commission</div>
-                        <input aria-label="New execution commission" type="number" min="0" step="0.01" value={execForm.commission} onChange={e => setExecForm(f => ({ ...f, commission: e.target.value }))} style={inputStyle} />
+                        <input aria-label="Commission de la nouvelle exécution" type="number" min="0" step="0.01" value={execForm.commission} onChange={e => setExecForm(f => ({ ...f, commission: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
                         <div className="field-label" style={{ marginBottom: 4 }}>Date</div>
-                        <input aria-label="New execution date" type="date" value={execForm.date || trade.date} onChange={e => setExecForm(f => ({ ...f, date: e.target.value }))} style={inputStyle} />
+                        <input aria-label="Date de la nouvelle exécution" type="date" value={execForm.date || trade.date} onChange={e => setExecForm(f => ({ ...f, date: e.target.value }))} style={inputStyle} />
                       </div>
                       <div>
-                        <div className="field-label" style={{ marginBottom: 4 }}>Time</div>
-                        <input aria-label="New execution time" type="time" value={execForm.time} onChange={e => setExecForm(f => ({ ...f, time: e.target.value }))} style={inputStyle} />
+                        <div className="field-label" style={{ marginBottom: 4 }}>Heure</div>
+                        <input aria-label="Heure de la nouvelle exécution" type="time" value={execForm.time} onChange={e => setExecForm(f => ({ ...f, time: e.target.value }))} style={inputStyle} />
                       </div>
                     </div>
                     {execError && <div className="notice neg" role="alert" style={{ marginBottom: 10 }}>{execError}</div>}
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button type="button" onClick={handleAddExecution} disabled={addingExec} className="btn btn-primary btn-sm">{addingExec ? 'Saving…' : 'Save'}</button>
-                      <button type="button" onClick={() => { setShowAddExec(false); setExecForm(EMPTY_EXEC); setExecError(null); }} className="btn btn-ghost btn-sm">Cancel</button>
+                      <button type="button" onClick={handleAddExecution} disabled={addingExec} className="btn btn-primary btn-sm">{addingExec ? 'Enregistrement…' : 'Enregistrer'}</button>
+                      <button type="button" onClick={() => { setShowAddExec(false); setExecForm(EMPTY_EXEC); setExecError(null); }} className="btn btn-ghost btn-sm">Annuler</button>
                     </div>
                   </div>
                 )}
@@ -1014,34 +1019,34 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
             {tab === 'What If' && (
               <div style={{ paddingTop: 8 }}>
                 {!stats.isClosed ? (
-                  <div className="text-muted" style={{ fontSize: 14 }}>Available for closed trades only.</div>
+                  <div className="text-muted" style={{ fontSize: 14 }}>Disponible uniquement pour les trades clôturés.</div>
                 ) : whatIfLoading ? (
-                  <div className="text-muted" role="status" style={{ fontSize: 14 }}>Loading 1-min bar data…</div>
+                  <div className="text-muted" role="status" style={{ fontSize: 14 }}>Chargement des données en bougies 1 min…</div>
                 ) : whatIfBars !== null && whatIfBars.length === 0 ? (
-                  <div className="text-muted" style={{ fontSize: 14 }}>Chart data unavailable. Alpaca market data is required for this feature.</div>
+                  <div className="text-muted" style={{ fontSize: 14 }}>Données du graphique indisponibles. Les données de marché Alpaca sont requises pour cette fonctionnalité.</div>
                 ) : whatIfBars !== null && (() => {
                   const isStock  = !trade.instrument_type || trade.instrument_type === 'STOCK';
                   const scenarios = computeWhatIf(whatIfBars, stats, trade);
-                  if (!scenarios) return <div className="text-muted" style={{ fontSize: 14 }}>Insufficient trade data.</div>;
+                  if (!scenarios) return <div className="text-muted" style={{ fontSize: 14 }}>Données de trade insuffisantes.</div>;
                   return (
                     <div>
                       {!isStock && (
                         <div className="notice accent" style={{ fontSize: 13, marginBottom: 10 }}>
-                          Prices shown are the <strong>underlying stock</strong>. Option P&L depends on delta, theta, and time value, so estimated P&L is not computed.
+                          Les prix affichés sont ceux du <strong>sous-jacent</strong>. Le P&L de l'option dépend du delta, du theta et de la valeur temps ; le P&L estimé n'est donc pas calculé.
                         </div>
                       )}
                       <div className="text-muted" style={{ marginBottom: 10, fontSize: 13 }}>
-                        Actual exit: <strong className="num" style={{ color: 'var(--text-primary)' }}>{stats.closeTime?.slice(0, 5)}</strong> @ <strong className="num" style={{ color: 'var(--text-primary)' }}>${stats.avgExit?.toFixed(2)}</strong>
-                        {isStock && <> · Net P&L: <strong className={`num ${(trade.net_pnl ?? 0) >= 0 ? 'pos' : 'neg'}`}>{fmtSigned$(trade.net_pnl)}</strong></>}
+                        Sortie réelle : <strong className="num" style={{ color: 'var(--text-primary)' }}>{stats.closeTime?.slice(0, 5)}</strong> @ <strong className="num" style={{ color: 'var(--text-primary)' }}>${stats.avgExit?.toFixed(2)}</strong>
+                        {isStock && <> · P&L net : <strong className={`num ${(trade.net_pnl ?? 0) >= 0 ? 'pos' : 'neg'}`}>{fmtSigned$(trade.net_pnl)}</strong></>}
                       </div>
                       <table>
                         <thead>
                           <tr>
-                            <th className={undefined}>Scenario</th>
-                            <th className={'num'}>Price</th>
+                            <th className={undefined}>Scénario</th>
+                            <th className={'num'}>Prix</th>
                             {isStock && <>
-                              <th className={'num'}>Est. P&L</th>
-                              <th className={'num'}>vs Actual</th>
+                              <th className={'num'}>P&L est.</th>
+                              <th className={'num'}>vs réel</th>
                             </>}
                           </tr>
                         </thead>
@@ -1080,23 +1085,23 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
           {/* Strategy & notes */}
           {analysis && (analysis.entry_reason || analysis.exit_reason || analysis.mistakes) && (
             <section className="card">
-              <PanelHead title="Strategy Notes" />
+              <PanelHead title="Notes de stratégie" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {analysis.entry_reason && (
                   <div>
-                    <div className="field-label" style={{ marginBottom: 4 }}>Entry Reason</div>
+                    <div className="field-label" style={{ marginBottom: 4 }}>Raison d'entrée</div>
                     <div style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.entry_reason}</div>
                   </div>
                 )}
                 {analysis.exit_reason && (
                   <div>
-                    <div className="field-label" style={{ marginBottom: 4 }}>Exit Reason</div>
+                    <div className="field-label" style={{ marginBottom: 4 }}>Raison de sortie</div>
                     <div style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.exit_reason}</div>
                   </div>
                 )}
                 {analysis.mistakes && (
                   <div>
-                    <div className="field-label" style={{ marginBottom: 4 }}>Mistakes</div>
+                    <div className="field-label" style={{ marginBottom: 4 }}>Erreurs</div>
                     <div className="neg" style={{ fontSize: 14.5, lineHeight: 1.55 }}>{analysis.mistakes}</div>
                   </div>
                 )}
@@ -1118,11 +1123,11 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
           {analysis?.ai_feedback && (
             <section className="card">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-                <h2 className="section-title">AI Analysis</h2>
+                <h2 className="section-title">Analyse IA</h2>
                 {analysis.match_confidence && (
                   <span className="chip">
                     <span className={`confidence-dot confidence-${analysis.match_confidence}`} />
-                    {analysis.match_confidence} match
+                    Correspondance : {analysis.match_confidence}
                   </span>
                 )}
               </div>
@@ -1132,14 +1137,14 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
               {analysis.r_multiple != null && (
                 <div style={{ marginTop: 12, display: 'flex', gap: 16 }}>
                   <div>
-                    <div className="field-label" style={{ marginBottom: 4 }}>Trade Quality (R)</div>
+                    <div className="field-label" style={{ marginBottom: 4 }}>Qualité du trade (R)</div>
                     <div className={`num ${analysis.r_multiple >= 0 ? 'pos' : 'neg'}`} style={{ fontSize: 20, fontWeight: 600 }}>
                       {Number(analysis.r_multiple).toFixed(2)}R
                     </div>
                   </div>
                   {analysis.risk_reward && (
                     <div>
-                      <div className="field-label" style={{ marginBottom: 4 }}>Planned R:R</div>
+                      <div className="field-label" style={{ marginBottom: 4 }}>R:R prévu</div>
                       <div className="num" style={{ fontSize: 20, fontWeight: 600 }}>1:{Number(analysis.risk_reward).toFixed(1)}</div>
                     </div>
                   )}
@@ -1155,25 +1160,25 @@ export default function TradeDetail({ trade: initialTrade, tradeNavList = [], on
             if (!scenarios) return null;
             return (
               <section className="card">
-                <h2 className="section-title">What If Scenarios</h2>
+                <h2 className="section-title">Scénarios Et si</h2>
                 <div className="text-muted" style={{ fontSize: 13, margin: '4px 0 12px' }}>
-                  Actual exit: <strong className="num" style={{ color: 'var(--text-primary)' }}>{stats.closeTime?.slice(0, 5)}</strong> @ <strong className="num" style={{ color: 'var(--text-primary)' }}>${stats.avgExit?.toFixed(2)}</strong>
-                  {isStock && <> · Net P&L: <strong className={`num ${pnl >= 0 ? 'pos' : 'neg'}`}>{fmtSigned$(trade.net_pnl)}</strong></>}
+                  Sortie réelle : <strong className="num" style={{ color: 'var(--text-primary)' }}>{stats.closeTime?.slice(0, 5)}</strong> @ <strong className="num" style={{ color: 'var(--text-primary)' }}>${stats.avgExit?.toFixed(2)}</strong>
+                  {isStock && <> · P&L net : <strong className={`num ${pnl >= 0 ? 'pos' : 'neg'}`}>{fmtSigned$(trade.net_pnl)}</strong></>}
                 </div>
                 {!isStock && (
                   <div className="notice accent" style={{ fontSize: 13, marginBottom: 10 }}>
-                    Prices shown are the underlying stock. Option P&L not estimated.
+                    Les prix affichés sont ceux du sous-jacent. Le P&L de l'option n'est pas estimé.
                   </div>
                 )}
                 <div className="scroll-x" style={{ margin: '0 -24px', padding: '0 12px' }}>
                 <table>
                   <thead>
                     <tr>
-                      <th className={undefined}>Scenario</th>
-                      <th className={'num'}>Price</th>
+                      <th className={undefined}>Scénario</th>
+                      <th className={'num'}>Prix</th>
                       {isStock && <>
-                        <th className={'num'}>Est. P&L</th>
-                        <th className={'num'}>vs Actual</th>
+                        <th className={'num'}>P&L est.</th>
+                        <th className={'num'}>vs réel</th>
                       </>}
                     </tr>
                   </thead>

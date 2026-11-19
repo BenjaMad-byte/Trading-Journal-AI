@@ -26,7 +26,7 @@ function nextTradingDay(iso) {
 }
 function formatDateLabel(iso) {
   const d = new Date(iso + 'T12:00:00');
-  return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 // ── R-Multiple chart ──────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ function RMultipleChart({ trades }) {
   if (!data.length) return null;
   return (
     <section className="card">
-      <PanelHead title="R-Multiple by Trade" />
+      <PanelHead title="Multiple R par trade" />
       <ResponsiveContainer width="100%" height={140}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
           <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
@@ -47,7 +47,7 @@ function RMultipleChart({ trades }) {
           <Tooltip
             cursor={{ fill: 'var(--accent-soft)' }}
             contentStyle={{ background: 'var(--surface-panel)', border: '1px solid var(--divider)', borderRadius: 6, fontSize: 13, color: 'var(--text-primary)' }}
-            formatter={(v) => [`${v.toFixed(2)}R`, 'R-Multiple']}
+            formatter={(v) => [`${v.toFixed(2)}R`, 'Multiple R']}
           />
           <Bar dataKey="r" radius={[4, 4, 0, 0]}>
             {data.map((entry, i) => (
@@ -174,17 +174,17 @@ export default function DailySummary({ accountId, date, onDateChange, onOpenDeta
       {/* ── Header ── */}
       <PageHeader
         title={formatDateLabel(date)}
-        subtitle="Day Review. Read the session while the decisions are fresh."
+        subtitle="Bilan du jour. Relis la session pendant que les décisions sont encore fraîches."
         actions={<>
-          <button type="button" className="btn btn-secondary" onClick={() => onDateChange(prevTradingDay(date))} aria-label="Previous trading day">
-            <ChevronLeft size={16} /> Previous
+          <button type="button" className="btn btn-secondary" onClick={() => onDateChange(prevTradingDay(date))} aria-label="Jour de trading précédent">
+            <ChevronLeft size={16} /> Précédent
           </button>
-          <button type="button" className="btn btn-secondary" onClick={() => onDateChange(nextTradingDay(date))} aria-label="Next trading day">
-            Next <ChevronRight size={16} />
+          <button type="button" className="btn btn-secondary" onClick={() => onDateChange(nextTradingDay(date))} aria-label="Jour de trading suivant">
+            Suivant <ChevronRight size={16} />
           </button>
           {date !== today && (
             <button type="button" className="btn btn-ghost" onClick={() => onDateChange(today)}>
-              <Calendar size={15} aria-hidden="true" /> Today
+              <Calendar size={15} aria-hidden="true" /> Aujourd'hui
             </button>
           )}
           <button
@@ -194,22 +194,22 @@ export default function DailySummary({ accountId, date, onDateChange, onOpenDeta
             disabled={regenerating || loading}
           >
             <RotateCcw size={14} style={{ animation: regenerating ? 'spin 1s linear infinite' : 'none' }} aria-hidden="true" />
-            {regenerating ? 'Regenerating...' : 'Regenerate AI'}
+            {regenerating ? 'Régénération...' : 'Régénérer l\'IA'}
           </button>
         </>}
       />
 
       {/* ── KPI Strip ── */}
       {loading ? (
-        <div className="v3-band"><div className="v3-empty">Loading…</div></div>
+        <div className="v3-band"><div className="v3-empty">Chargement…</div></div>
       ) : (
         <>
           <div className="v3-hero" style={{ paddingTop: 8 }}>
             <div className="v3-sec-head" style={{ marginBottom: 6 }}>
               <div>
-                <h2 className="v3-h">The session</h2>
+                <h2 className="v3-h">La session</h2>
                 <p className="v3-h-sub">
-                  Running P&amp;L from the open to the close, with every trade marked where you entered it
+                  P&amp;L en cours de l'ouverture à la clôture, avec chaque trade marqué à l'endroit où tu es entré
                 </p>
               </div>
             </div>
@@ -224,10 +224,10 @@ export default function DailySummary({ accountId, date, onDateChange, onOpenDeta
         <div className="notice caution" role="alert" style={{ alignItems: 'center', marginBottom: 20 }}>
           <AlertTriangle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
           <span style={{ fontSize: 14, fontWeight: 600, flex: 1 }}>
-            {consecutiveLosses} losses in a row. Consider stepping back and reviewing before the next trade.
+            {consecutiveLosses} pertes consécutives. Prends du recul et relis avant le prochain trade.
           </span>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCbDismissed(true)} aria-label="Dismiss loss-streak alert" style={{ color: 'inherit' }}>
-            Dismiss
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCbDismissed(true)} aria-label="Ignorer l'alerte de série de pertes" style={{ color: 'inherit' }}>
+            Ignorer
           </button>
         </div>
       )}
@@ -243,7 +243,7 @@ export default function DailySummary({ accountId, date, onDateChange, onOpenDeta
           {/* The trades */}
           <section className="card panel-flush">
             <div style={{ padding: '18px 0 12px' }}>
-              <PanelHead title="Trade by trade" sub="Hover a grade for the reason. Click a row to open the trade." />
+              <PanelHead title="Trade par trade" sub="Survole une note pour voir la raison. Clique sur une ligne pour ouvrir le trade." />
             </div>
             <DayTrades
               trades={trades}

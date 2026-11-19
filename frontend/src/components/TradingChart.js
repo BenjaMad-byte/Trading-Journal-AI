@@ -70,8 +70,8 @@ const TIMEFRAMES = [
   { id: '15Min', label: '15m' },
   { id: '30Min', label: '30m' },
   { id: '1Hour', label: '1H' },
-  { id: '1Day', label: 'Daily' },
-  { id: '1Week', label: 'Weekly' },
+  { id: '1Day', label: 'Jour' },
+  { id: '1Week', label: 'Semaine' },
 ];
 const TF_MINUTES = { '1Min': 1, '3Min': 3, '5Min': 5, '10Min': 10, '15Min': 15, '30Min': 30, '1Hour': 60 };
 const WIDE_RANGE_TFS = new Set(['1Day', '1Week']);
@@ -101,7 +101,7 @@ function applyLayers(layers, visible) {
   if (!layers) return;
   (layers.vwap || []).forEach(line => line.applyOptions({ visible: visible.vwap }));
   if (layers.sl) layers.sl.applyOptions({ lineVisible: visible.sl, axisLabelVisible: visible.sl, title: visible.sl ? 'SL' : '' });
-  if (layers.target) layers.target.applyOptions({ lineVisible: visible.target, axisLabelVisible: visible.target, title: visible.target ? 'Target' : '' });
+  if (layers.target) layers.target.applyOptions({ lineVisible: visible.target, axisLabelVisible: visible.target, title: visible.target ? 'Objectif' : '' });
   if (layers.candles) {
     const shown = layers.markers
       .filter(m => (m.isBuy ? visible.buy : visible.sell))
@@ -168,7 +168,7 @@ export default function TradingChart({
     if (isInitialLoad) { setLoading(true); setBars([]); setWarning(null); }
     chartApi.get(ticker, date, timeframe, daysBack)
       .then(r => { setBars(r.data.bars || []); setWarning(r.data.warning || null); })
-      .catch(() => { if (isInitialLoad) setWarning('Failed to load chart data'); })
+      .catch(() => { if (isInitialLoad) setWarning('Échec du chargement des données du graphique'); })
       .finally(() => {
         if (isInitialLoad) setLoading(false);
         isInitialFetchRef.current = false;
@@ -297,10 +297,10 @@ export default function TradingChart({
     const ae = avgPrice(entryFills);
     const ax = avgPrice(exitFills);
 
-    if (ae) candleSeries.createPriceLine({ price: ae, color: T.up, lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'Entry' });
-    if (ax) candleSeries.createPriceLine({ price: ax, color: T.down, lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'Exit' });
+    if (ae) candleSeries.createPriceLine({ price: ae, color: T.up, lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'Entrée' });
+    if (ax) candleSeries.createPriceLine({ price: ax, color: T.down, lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'Sortie' });
     if (analysis?.stop_loss) layersRef.current.sl = candleSeries.createPriceLine({ price: Number(analysis.stop_loss), color: T.stop, lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: 'SL' });
-    if (analysis?.target_price) layersRef.current.target = candleSeries.createPriceLine({ price: Number(analysis.target_price), color: T.target, lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: 'Target' });
+    if (analysis?.target_price) layersRef.current.target = candleSeries.createPriceLine({ price: Number(analysis.target_price), color: T.target, lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: 'Objectif' });
 
     // ── Execution markers ────────────────────────────────────────────────
     // Colored and shaped by the actual fill action (matches the Buy/Sell legend
@@ -419,11 +419,11 @@ export default function TradingChart({
 
   const toggle = (key) => setVisible(v => ({ ...v, [key]: !v[key] }));
   const legendItems = [
-    { key: 'buy', label: 'Buy fill', swatch: { width: 9, height: 9, borderRadius: '50%', background: 'var(--result-pos)' } },
-    { key: 'sell', label: 'Sell fill', swatch: { width: 9, height: 9, borderRadius: '50%', background: 'var(--result-neg)' } },
+    { key: 'buy', label: 'Achat', swatch: { width: 9, height: 9, borderRadius: '50%', background: 'var(--result-pos)' } },
+    { key: 'sell', label: 'Vente', swatch: { width: 9, height: 9, borderRadius: '50%', background: 'var(--result-neg)' } },
     !isWide && { key: 'vwap', label: 'VWAP', swatch: { width: 16, height: 2, background: 'var(--text-secondary)' } },
     analysis?.stop_loss && { key: 'sl', label: 'SL', swatch: { width: 16, height: 2, background: 'var(--caution)' } },
-    analysis?.target_price && { key: 'target', label: 'Target', swatch: { width: 16, height: 2, background: 'var(--accent-line)' } },
+    analysis?.target_price && { key: 'target', label: 'Objectif', swatch: { width: 16, height: 2, background: 'var(--accent-line)' } },
   ].filter(Boolean);
 
   return (
@@ -433,9 +433,9 @@ export default function TradingChart({
         marginBottom: 8, flexWrap: 'wrap', gap: 8,
       }}>
         <h2 className="section-title" style={{ fontSize: 17 }}>
-          {ticker} · {TIMEFRAMES.find(t => t.id === timeframe)?.label} Chart · <span className="num text-muted" style={{ fontWeight: 500 }}>{date}</span>
+          {ticker} · {TIMEFRAMES.find(t => t.id === timeframe)?.label} Graphique · <span className="num text-muted" style={{ fontWeight: 500 }}>{date}</span>
         </h2>
-        <div className="seg" role="group" aria-label="Chart timeframe">
+        <div className="seg" role="group" aria-label="Intervalle du graphique">
           {TIMEFRAMES.map(tf => (
             <button
               type="button"
@@ -464,14 +464,14 @@ export default function TradingChart({
       ) : (
         <>
           {warning && <div role="status" style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>{warning}</div>}
-          <div className="chart-legend" role="group" aria-label="Show or hide chart layers">
+          <div className="chart-legend" role="group" aria-label="Afficher ou masquer les couches du graphique">
             {legendItems.map(item => (
               <button
                 type="button"
                 key={item.key}
                 className="chart-legend-item"
                 aria-pressed={visible[item.key]}
-                title={`${visible[item.key] ? 'Hide' : 'Show'} ${item.label}`}
+                title={`${visible[item.key] ? 'Masquer' : 'Afficher'} ${item.label}`}
                 onClick={() => toggle(item.key)}
               >
                 <span aria-hidden="true" style={{ display: 'inline-block', ...item.swatch }} />

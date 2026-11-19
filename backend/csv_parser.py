@@ -19,6 +19,7 @@ MONTH_MAP = {
 FUTURES_MULTIPLIERS = {
     '/ES': 50, '/MES': 5, '/NQ': 20, '/MNQ': 2,
     '/YM': 5, '/MYM': 0.5, '/RTY': 50, '/M2K': 5,
+    '/GC': 100, '/MGC': 10, '/CL': 1000, '/MCL': 100,
 }
 
 
@@ -1282,6 +1283,130 @@ def parse_ibkr_csv(content: str, account_id: int, conn=None, import_tz: str = IM
     return build_trades_from_executions(executions, account_id, conn)
 
 
+# ── Tradovate (Performance export) ────────────────────────────────────────────
+#
+# Tradovate's web platform -> Reports -> Performance exports one row per
+# CLOSED round trip (already matched buy+sell), not one row per fill:
+#   symbol,_priceFormat,_priceFormatType,_tickSize,buyFillId,sellFillId,qty,
+#   buyPrice,sellPrice,pnl,boughtTimestamp,soldTimestamp,duration
+# Whichever of boughtTimestamp/soldTimestamp is earlier is the entry fill —
+# a short trade sells first and buys back later, so soldTimestamp can be
+# earlier than boughtTimestamp. The file has no commission column, so
+# imported trades carry commissions=0; the 'pnl' column is gross, matching
+# this parser's own price*qty*multiplier computation (used only as a
+# cross-check, not trusted directly, so a misread row still gets caught by
+# build_trades_from_executions' normal validation).
+
+_TRADOVATE_MONTH_CODE = re.compile(r'^(.+?)[FGHJKMNQUVXZ]\d$')
+
+
+def _tradovate_root(symbol: str) -> str:
+    """'MNQZ6' -> '/MNQ' (strip the month+year contract code, add the / prefix)."""
+    m = _TRADOVATE_MONTH_CODE.match(symbol.strip().upper())
+    root = m.group(1) if m else symbol.strip().upper()
+    return root if root.startswith('/') else '/' + root
+
+
+def _tradovate_datetime(value: str) -> tuple[str, str] | None:
+    """'10/30/2026 16:21:30' -> ('2026-10-30', '16:21:30')."""
+    parts = value.strip().split(' ', 1)
+    if len(parts) != 2:
+        return None
+    date = _generic_date(parts[0])
+    time_ = _generic_time(parts[1])
+    return (date, time_) if date and time_ else None
+
+
+def parse_tradovate_csv(content: str, account_id: int, conn=None, import_tz: str = IMPORT_LOCAL_TZ) -> tuple[list[dict], int]:
+    """
+    Tradovate Performance export parse pipeline (web platform -> Reports ->
+    Performance -> Export). Same output contract as parse_thinkorswim_csv.
+    import_tz is accepted for a uniform call signature but unused — Tradovate
+    exports already carry exchange-time timestamps.
+    """
+    rows = list(csv.DictReader(io.StringIO(content.lstrip('﻿'))))
+    if not rows or 'buyFillId' not in rows[0] or 'sellFillId' not in rows[0]:
+        raise ValueError(
+            "This does not look like a Tradovate Performance export. In Tradovate: "
+            "Reports -> Performance -> Export, and import that CSV."
+        )
+
+    executions, problems = [], []
+    for n, row in enumerate(rows, start=2):
+        if not any(v.strip() for v in row.values() if v is not None):
+            continue
+        why = []
+
+        symbol = (row.get('symbol') or '').strip()
+        ticker = _tradovate_root(symbol) if symbol else ''
+        if not symbol:
+            why.append("symbol is empty")
+
+        try:
+            qty = abs(_num(row.get('qty') or ''))
+            if qty == 0:
+                raise ValueError
+            qty = int(qty) if qty == int(qty) else round(qty, 6)
+        except ValueError:
+            qty = None
+            why.append(f"qty '{row.get('qty')}' is not a number above zero")
+
+        try:
+            buy_price = abs(_num(row.get('buyPrice') or ''))
+        except ValueError:
+            buy_price = None
+            why.append(f"buyPrice '{row.get('buyPrice')}' is not a number")
+        try:
+            sell_price = abs(_num(row.get('sellPrice') or ''))
+        except ValueError:
+            sell_price = None
+            why.append(f"sellPrice '{row.get('sellPrice')}' is not a number")
+
+        bought = _tradovate_datetime(row.get('boughtTimestamp') or '')
+        sold = _tradovate_datetime(row.get('soldTimestamp') or '')
+        if not bought:
+            why.append(f"boughtTimestamp '{row.get('boughtTimestamp')}' is not M/D/YYYY HH:MM:SS")
+        if not sold:
+            why.append(f"soldTimestamp '{row.get('soldTimestamp')}' is not M/D/YYYY HH:MM:SS")
+
+        multiplier = _futures_multiplier(ticker) if ticker else None
+        if ticker and not multiplier:
+            why.append(f"no known point value for {ticker}; add it to FUTURES_MULTIPLIERS")
+
+        if why:
+            problems.append(f"line {n}: " + "; ".join(why))
+            continue
+
+        buy_date, buy_time = bought
+        sell_date, sell_time = sold
+
+        executions.append({
+            'action': 'BOT', 'qty': qty, 'ticker': ticker, 'price': buy_price,
+            'instrument_type': 'FUTURE', 'option_expiry': None, 'option_strike': None,
+            'option_type': None, 'date': buy_date, 'iso_date': buy_date, 'time': buy_time,
+            'amount': round(-buy_price * qty * multiplier, 2), 'commission': 0.0,
+            'raw_description': f"BOT {qty} {ticker} @{buy_price}",
+        })
+        executions.append({
+            'action': 'SOLD', 'qty': qty, 'ticker': ticker, 'price': sell_price,
+            'instrument_type': 'FUTURE', 'option_expiry': None, 'option_strike': None,
+            'option_type': None, 'date': sell_date, 'iso_date': sell_date, 'time': sell_time,
+            'amount': round(sell_price * qty * multiplier, 2), 'commission': 0.0,
+            'raw_description': f"SOLD {qty} {ticker} @{sell_price}",
+        })
+
+    if problems:
+        more = f" (and {len(problems) - 8} more)" if len(problems) > 8 else ""
+        raise ValueError(
+            f"{len(problems)} row(s) could not be read, so nothing was imported{more}. "
+            + " | ".join(problems[:8])
+        )
+    if not executions:
+        raise ValueError("The file has the Tradovate Performance header but no trade rows.")
+
+    return build_trades_from_executions(executions, account_id, conn)
+
+
 # ── Generic CSV (any broker, one row per execution) ───────────────────────────
 #
 # For brokers without a dedicated parser. The user copies their fills into the
@@ -1532,12 +1657,14 @@ def parse_generic_csv(content, account_id, conn=None, import_tz: str = IMPORT_LO
 BROKER_PARSERS = {
     'thinkorswim': parse_thinkorswim_csv,
     'ibkr': parse_ibkr_csv,
+    'tradovate': parse_tradovate_csv,
     'generic': parse_generic_csv,
 }
 
 BROKER_LABELS = {
     'thinkorswim': 'Thinkorswim',
     'ibkr': 'Interactive Brokers',
+    'tradovate': 'Tradovate',
     'generic': 'the generic template',
 }
 
@@ -1555,6 +1682,8 @@ def detect_broker(content: str) -> str | None:
     if ('CASH BALANCE' in upper or 'ACCOUNT STATEMENT' in upper
             or 'ACCOUNT TRADE HISTORY' in upper or 'FUTURES STATEMENTS' in upper):
         return 'thinkorswim'
+    if 'BUYFILLID' in upper and 'SELLFILLID' in upper:
+        return 'tradovate'
     # Checked last: the first non-empty row is a header with the template's columns.
     for cells in csv.reader(io.StringIO(head)):
         if not any(c.strip() for c in cells):

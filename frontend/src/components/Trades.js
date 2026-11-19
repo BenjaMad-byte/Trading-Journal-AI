@@ -112,8 +112,8 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
   const lastShown = Math.min(page * PAGE_SIZE, sorted.length);
 
   const period = dateFrom || dateTo
-    ? `${dateFrom ? fmtDay(dateFrom) : 'Start'} to ${dateTo ? fmtDay(dateTo) : 'today'}`
-    : 'All dates';
+    ? `${dateFrom ? fmtDay(dateFrom) : 'Début'} au ${dateTo ? fmtDay(dateTo) : "aujourd'hui"}`
+    : 'Toutes les dates';
 
   // Plain render function (not a component) so headers keep focus across re-sorts.
   const sortTh = (col, label, className) => (
@@ -127,26 +127,26 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
   return (
     <div>
       <PageHeader
-        title="Trade View"
-        subtitle="Click a row to open the trade. The Setup column is editable in place."
+        title="Trades"
+        subtitle="Cliquez sur une ligne pour ouvrir le trade. La colonne Setup est modifiable directement."
       />
 
-      <KpiStrip label="Filtered trade summary">
-        <KpiCell label="Selected period" value={<span style={{ fontSize: 22 }}>{period}</span>} />
-        <KpiCell label="Net P&L" value={<MoneyValue value={totalNet} />} tone={totalNet >= 0 ? 'pos' : 'neg'} />
+      <KpiStrip label="Résumé des trades filtrés">
+        <KpiCell label="Période sélectionnée" value={<span style={{ fontSize: 22 }}>{period}</span>} />
+        <KpiCell label="P&L net" value={<MoneyValue value={totalNet} />} tone={totalNet >= 0 ? 'pos' : 'neg'} />
         <KpiCell label="Trades" value={<span className="num">{trades.length.toLocaleString('en-US')}</span>} />
-        <KpiCell label="Win rate" value={<span className="num">{winRate}%</span>} foot={<><span className="num">{winners}</span> winners</>} />
+        <KpiCell label="Taux de réussite" value={<span className="num">{winRate}%</span>} foot={<><span className="num">{winners}</span> gains</>} />
       </KpiStrip>
 
       {/* Filter bar */}
-      <div role="search" aria-label="Filter trades" style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+      <div role="search" aria-label="Filtrer les trades" style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <div>
-          <label className="field-label" htmlFor="tv-ticker">Ticker</label>
+          <label className="field-label" htmlFor="tv-ticker">Symbole</label>
           <div style={{ position: 'relative' }}>
             <Search size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} aria-hidden="true" />
             <input
               id="tv-ticker"
-              placeholder="Ticker..."
+              placeholder="Symbole..."
               value={ticker}
               onChange={e => setTicker(e.target.value)}
               style={{ paddingLeft: 32, width: 170 }}
@@ -156,18 +156,18 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
         <div>
           <label className="field-label" htmlFor="tv-type">Type</label>
           <select id="tv-type" value={instrType} onChange={e => setInstrType(e.target.value)} style={{ width: 140 }}>
-            <option value="">All Types</option>
-            <option value="STOCK">Stock</option>
+            <option value="">Tous les types</option>
+            <option value="STOCK">Action</option>
             <option value="OPTION">Option</option>
             <option value="FUTURE">Future</option>
           </select>
         </div>
         <div>
-          <label className="field-label" htmlFor="tv-from">From</label>
+          <label className="field-label" htmlFor="tv-from">Du</label>
           <input id="tv-from" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ width: 160 }} />
         </div>
         <div>
-          <label className="field-label" htmlFor="tv-to">To</label>
+          <label className="field-label" htmlFor="tv-to">Au</label>
           <input id="tv-to" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ width: 160 }} />
         </div>
         {(ticker || instrType || dateFrom || dateTo) && (
@@ -176,7 +176,7 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
             className="btn btn-ghost"
             onClick={() => { setTicker(''); setInstrType(''); setDateFrom(''); setDateTo(''); }}
           >
-            Clear
+            Effacer
           </button>
         )}
       </div>
@@ -192,15 +192,15 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
           <table style={{ minWidth: 980 }}>
             <thead>
               <tr>
-                {sortTh('datetime', 'Date / Time')}
-                {sortTh('ticker', 'Ticker')}
+                {sortTh('datetime', 'Date / Heure')}
+                {sortTh('ticker', 'Symbole')}
                 {sortTh('type', 'Type')}
-                {sortTh('side', 'Side')}
-                {sortTh('net_pnl', 'Net P&L', 'num')}
-                <th>Setup / Strategy</th>
-                <th title="MFE / MAE / exit efficiency: best gain reached, worst loss reached, and the share of the move you captured">MFE / MAE / Exit</th>
+                {sortTh('side', 'Sens')}
+                {sortTh('net_pnl', 'P&L net', 'num')}
+                <th>Setup / Stratégie</th>
+                <th title="MFE / MAE / efficacité de sortie : meilleur gain atteint, pire perte atteinte, et la part du mouvement capturée">MFE / MAE / Sortie</th>
                 {sortTh('r_multiple', 'R', 'num')}
-                <th><span className="sr-only">Expand</span></th>
+                <th><span className="sr-only">Développer</span></th>
               </tr>
             </thead>
             <tbody>
@@ -215,7 +215,7 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
               ) : paginated.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="empty">
-                    No trades found. Import a CSV to get started.
+                    Aucun trade trouvé. Importez un CSV pour commencer.
                   </td>
                 </tr>
               ) : (
@@ -240,16 +240,16 @@ export default function Trades({ accountId, initialDateFrom = '', initialDateTo 
           gap: 8, padding: '12px 20px', borderTop: '1px solid var(--divider-soft)',
         }}>
           <span className="text-muted" style={{ fontSize: 13 }}>
-            Showing <span className="num">{firstShown}-{lastShown}</span> of <span className="num">{sorted.length}</span> trades
+            Affichage de <span className="num">{firstShown}-{lastShown}</span> sur <span className="num">{sorted.length}</span> trades
           </span>
           {totalPages > 1 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                ← Prev
+                ← Précédent
               </button>
-              <span className="text-muted num" style={{ fontSize: 13 }}>Page {page} of {totalPages}</span>
+              <span className="text-muted num" style={{ fontSize: 13 }}>Page {page} sur {totalPages}</span>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-                Next →
+                Suivant →
               </button>
             </div>
           )}

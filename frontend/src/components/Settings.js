@@ -1,34 +1,37 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Pencil, GitMerge, Trash2, Search } from 'lucide-react';
-import { libraryApi, appSettingsApi } from '../api';
+import { libraryApi, appSettingsApi, cloudApi } from '../api';
 import { PageHeader } from './ui';
 
 const SECTIONS = [
-  { id: 'general', label: 'General' },
-  { id: 'strategy', label: 'Strategies' },
+  { id: 'general', label: 'Général' },
+  { id: 'account', label: 'Compte' },
+  { id: 'strategy', label: 'Stratégies' },
   { id: 'source', label: 'Sources' },
   { id: 'tag', label: 'Tags' },
 ];
 
+const CLOUD_SESSION_KEY = 'lj_cloud_session';
+
 const TAG_TYPE_LABEL = {
-  mistake: 'Mistakes', execution: 'Execution', setup: 'Setup', emotion: 'Emotion', outcome: 'Outcome',
+  mistake: 'Erreurs', execution: 'Exécution', setup: 'Setup', emotion: 'Émotion', outcome: 'Résultat',
 };
 const TAG_TYPE_ORDER = ['mistake', 'execution', 'setup', 'emotion', 'outcome'];
 
 const SECTION_COPY = {
   strategy: {
-    title: 'Strategies',
-    sub: 'Why you took the trade, the same idea as a setup.',
-    noun: 'strategy',
+    title: 'Stratégies',
+    sub: 'La raison pour laquelle vous avez pris le trade, la même idée qu\'un setup.',
+    noun: 'une stratégie',
   },
   source: {
     title: 'Sources',
-    sub: 'Where the idea or alert came from.',
-    noun: 'source',
+    sub: "D'où vient l'idée ou l'alerte.",
+    noun: 'une source',
   },
 };
 
-const errText = (e) => e?.response?.data?.detail || e?.response?.data?.error || e?.message || 'Something went wrong';
+const errText = (e) => e?.response?.data?.detail || e?.response?.data?.error || e?.message || 'Une erreur est survenue';
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 /** One editable list: strategies, sources, or a single tag type. */
@@ -93,12 +96,12 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
               type="search"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder={`Search ${title.toLowerCase()}`}
-              aria-label={`Search ${title.toLowerCase()}`}
+              placeholder={`Rechercher ${title.toLowerCase()}`}
+              aria-label={`Rechercher ${title.toLowerCase()}`}
             />
           </label>
           <button type="button" className="btn btn-primary btn-sm" onClick={startAdd}>
-            <Plus size={14} /> Add {noun}
+            <Plus size={14} /> Ajouter {noun}
           </button>
         </div>
       </div>
@@ -108,17 +111,17 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
       {adding && (
         <div className="settings-form">
           <label>
-            <span className="field-label">Name</span>
+            <span className="field-label">Nom</span>
             <input autoFocus value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
               onKeyDown={e => { if (e.key === 'Enter' && draft.name.trim()) saveAdd(); if (e.key === 'Escape') setAdding(false); }} />
           </label>
           <label style={{ flex: 2 }}>
-            <span className="field-label">Description (optional)</span>
+            <span className="field-label">Description (facultatif)</span>
             <input value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} />
           </label>
           <div className="settings-form-actions">
-            <button type="button" className="btn btn-primary btn-sm" disabled={busy || !draft.name.trim()} onClick={saveAdd}>Save</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setAdding(false); setError(null); }}>Cancel</button>
+            <button type="button" className="btn btn-primary btn-sm" disabled={busy || !draft.name.trim()} onClick={saveAdd}>Enregistrer</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setAdding(false); setError(null); }}>Annuler</button>
           </div>
           {error && <div className="notice neg" role="alert" style={{ flexBasis: '100%' }}>{error}</div>}
         </div>
@@ -128,7 +131,7 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
         <table style={{ minWidth: 640 }}>
           <thead>
             <tr>
-              <th style={{ paddingLeft: 20 }}>Name</th>
+              <th style={{ paddingLeft: 20 }}>Nom</th>
               <th>Description</th>
               <th className="num">Trades</th>
               <th className="num" style={{ paddingRight: 20 }}><span className="sr-only">Actions</span></th>
@@ -144,23 +147,23 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
                     {item.name}
                     {item.aliases?.length > 0 && (
                       <div className="text-muted" style={{ fontSize: 12.5, fontWeight: 400, marginTop: 2 }}>
-                        Also saved as: {item.aliases.join(', ')}
+                        Également enregistré sous : {item.aliases.join(', ')}
                       </div>
                     )}
                   </td>
                   <td className="text-muted" style={{ fontSize: 14 }}>{item.description || ''}</td>
                   <td className="num">{item.trades}</td>
                   <td className="num" style={{ paddingRight: 20, whiteSpace: 'nowrap' }}>
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => open('edit', item)} aria-label={`Edit ${item.name}`}>
-                      <Pencil size={13} /> Edit
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => open('edit', item)} aria-label={`Modifier ${item.name}`}>
+                      <Pencil size={13} /> Modifier
                     </button>
                     {!fixed && (
                       <>
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => open('merge', item)} aria-label={`Merge ${item.name} into another ${noun}`} disabled={items.length < 2}>
-                          <GitMerge size={13} /> Merge
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => open('merge', item)} aria-label={`Fusionner ${item.name} avec ${noun}`} disabled={items.length < 2}>
+                          <GitMerge size={13} /> Fusionner
                         </button>
-                        <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--result-neg)' }} onClick={() => open('delete', item)} aria-label={`Delete ${item.name}`}>
-                          <Trash2 size={13} /> Delete
+                        <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--result-neg)' }} onClick={() => open('delete', item)} aria-label={`Supprimer ${item.name}`}>
+                          <Trash2 size={13} /> Supprimer
                         </button>
                       </>
                     )}
@@ -172,7 +175,7 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
                       {active === 'edit' && (
                         <div className="settings-form">
                           <label>
-                            <span className="field-label">Name</span>
+                            <span className="field-label">Nom</span>
                             <input value={form.name} disabled={fixed} autoFocus={!fixed}
                               onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                           </label>
@@ -186,16 +189,16 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
                               onClick={() => run(
                                 () => libraryApi.update({ ...base, name: item.name, new_name: form.name, description: form.description }),
                                 (r) => (r.name && r.name !== item.name
-                                  ? `Renamed "${item.name}" to "${r.name}" on ${plural(r.trades ?? item.trades, 'trade')}.`
-                                  : `Saved "${item.name}".`),
+                                  ? `Renommé « ${item.name} » en « ${r.name} » sur ${plural(r.trades ?? item.trades, 'trade')}.`
+                                  : `Enregistré « ${item.name} ».`),
                               )}>
-                              Save
+                              Enregistrer
                             </button>
-                            <button type="button" className="btn btn-ghost btn-sm" onClick={close}>Cancel</button>
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={close}>Annuler</button>
                           </div>
                           {!fixed && item.trades > 0 && (
                             <div className="text-muted" style={{ flexBasis: '100%', fontSize: 13 }}>
-                              Renaming updates {plural(item.trades, 'trade')}.
+                              Le renommage met à jour {plural(item.trades, 'trade')}.
                             </div>
                           )}
                         </div>
@@ -204,9 +207,9 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
                       {active === 'merge' && (
                         <div className="settings-form">
                           <label style={{ flex: 2 }}>
-                            <span className="field-label">Merge "{item.name}" into</span>
+                            <span className="field-label">Fusionner « {item.name} » avec</span>
                             <select value={form.target} autoFocus onChange={e => setForm({ target: e.target.value })}>
-                              <option value="">Choose a {noun}…</option>
+                              <option value="">Choisir {noun}…</option>
                               {others(item.name).map(o => <option key={o.name} value={o.name}>{o.name} ({o.trades})</option>)}
                             </select>
                           </label>
@@ -214,16 +217,16 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
                             <button type="button" className="btn btn-primary btn-sm" disabled={busy || !form.target}
                               onClick={() => run(
                                 () => libraryApi.merge({ ...base, source_name: item.name, target_name: form.target }),
-                                (r) => `Merged "${item.name}" into "${form.target}": ${plural(r.moved ?? item.trades, 'trade')} moved.`,
+                                (r) => `Fusionné « ${item.name} » dans « ${form.target} » : ${plural(r.moved ?? item.trades, 'trade')} déplacé(s).`,
                               )}>
-                              Merge
+                              Fusionner
                             </button>
-                            <button type="button" className="btn btn-ghost btn-sm" onClick={close}>Cancel</button>
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={close}>Annuler</button>
                           </div>
                           <div className="text-muted" style={{ flexBasis: '100%', fontSize: 13 }}>
                             {form.target
-                              ? `Moves ${plural(item.trades, 'trade')} to "${form.target}" and removes "${item.name}". If the AI writes "${item.name}" again, it is saved as "${form.target}".`
-                              : 'Pick the name to keep.'}
+                              ? `Déplace ${plural(item.trades, 'trade')} vers « ${form.target} » et supprime « ${item.name} ». Si l'IA écrit « ${item.name} » à nouveau, c'est enregistré comme « ${form.target} ».`
+                              : 'Choisissez le nom à conserver.'}
                           </div>
                         </div>
                       )}
@@ -232,26 +235,26 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
                         <div className="settings-form">
                           {item.trades > 0 ? (
                             <label style={{ flex: 2 }}>
-                              <span className="field-label">{plural(item.trades, 'trade')} use "{item.name}". Reassign them to</span>
+                              <span className="field-label">{plural(item.trades, 'trade')} utilisent « {item.name} ». Les réaffecter à</span>
                               <select value={form.reassign} autoFocus onChange={e => setForm({ reassign: e.target.value })}>
-                                <option value="">Leave blank</option>
+                                <option value="">Laisser vide</option>
                                 {others(item.name).map(o => <option key={o.name} value={o.name}>{o.name}</option>)}
                               </select>
                             </label>
                           ) : (
-                            <div style={{ flex: 2, alignSelf: 'center' }}>Delete "{item.name}"? No trades use it.</div>
+                            <div style={{ flex: 2, alignSelf: 'center' }}>Supprimer « {item.name} » ? Aucun trade ne l'utilise.</div>
                           )}
                           <div className="settings-form-actions">
                             <button type="button" className="btn btn-danger btn-sm" disabled={busy}
                               onClick={() => run(
                                 () => libraryApi.remove({ ...base, name: item.name, reassign_to: form.reassign || null }),
                                 (r) => (r.reassigned_to
-                                  ? `Deleted "${item.name}". ${plural(r.affected, 'trade')} now use "${r.reassigned_to}".`
-                                  : `Deleted "${item.name}".${r.affected ? ` ${plural(r.affected, 'trade')} left blank.` : ''}`),
+                                  ? `Supprimé « ${item.name} ». ${plural(r.affected, 'trade')} utilisent maintenant « ${r.reassigned_to} ».`
+                                  : `Supprimé « ${item.name} ».${r.affected ? ` ${plural(r.affected, 'trade')} laissé(s) vide(s).` : ''}`),
                               )}>
-                              Delete
+                              Supprimer
                             </button>
-                            <button type="button" className="btn btn-ghost btn-sm" onClick={close}>Cancel</button>
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={close}>Annuler</button>
                           </div>
                         </div>
                       )}
@@ -262,7 +265,7 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
               ];
             })}
             {!shown.length && (
-              <tr><td colSpan={4}><div className="empty">{query ? 'Nothing matches that search.' : `No ${title.toLowerCase()} yet.`}</div></td></tr>
+              <tr><td colSpan={4}><div className="empty">{query ? 'Aucun résultat pour cette recherche.' : `Rien dans « ${title} » pour le moment.`}</div></td></tr>
             )}
           </tbody>
         </table>
@@ -275,20 +278,157 @@ function ItemList({ kind, tagType = '', title, sub, noun, items, onChanged }) {
 // exhaustive — the backend accepts any valid IANA zone name, so this list
 // is just a convenient picker rather than a hard restriction.
 const TIMEZONE_OPTIONS = [
-  { value: 'America/New_York', label: 'US Eastern — New York (exchange time)' },
-  { value: 'America/Chicago', label: 'US Central — Chicago' },
-  { value: 'America/Denver', label: 'US Mountain — Denver' },
-  { value: 'America/Los_Angeles', label: 'US Pacific — Los Angeles' },
-  { value: 'Europe/London', label: 'UK — London' },
-  { value: 'Europe/Berlin', label: 'Central Europe — Berlin, Paris, Madrid' },
-  { value: 'Europe/Bucharest', label: 'Eastern Europe — Bucharest, Athens, Helsinki' },
-  { value: 'Europe/Moscow', label: 'Moscow' },
-  { value: 'Asia/Dubai', label: 'Dubai' },
-  { value: 'Asia/Kolkata', label: 'India — Mumbai, Delhi' },
-  { value: 'Asia/Singapore', label: 'Singapore' },
+  { value: 'America/New_York', label: 'Est US — New York (heure de la Bourse)' },
+  { value: 'America/Chicago', label: 'Centre US — Chicago' },
+  { value: 'America/Denver', label: 'Montagnes US — Denver' },
+  { value: 'America/Los_Angeles', label: 'Pacifique US — Los Angeles' },
+  { value: 'Europe/London', label: 'Royaume-Uni — Londres' },
+  { value: 'Europe/Berlin', label: 'Europe centrale — Berlin, Paris, Madrid' },
+  { value: 'Europe/Bucharest', label: 'Europe de l\'Est — Bucarest, Athènes, Helsinki' },
+  { value: 'Europe/Moscow', label: 'Moscou' },
+  { value: 'Asia/Dubai', label: 'Dubaï' },
+  { value: 'Asia/Kolkata', label: 'Inde — Mumbai, Delhi' },
+  { value: 'Asia/Singapore', label: 'Singapour' },
   { value: 'Asia/Tokyo', label: 'Tokyo' },
   { value: 'Australia/Sydney', label: 'Sydney' },
 ];
+
+function loadCloudSession() {
+  try {
+    const raw = localStorage.getItem(CLOUD_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Compte : connexion email/mot de passe (Supabase) + sauvegarde/restauration cloud du journal. */
+function CloudAccount() {
+  const [session, setSession] = useState(loadCloudSession);
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+  const [lastBackup, setLastBackup] = useState(null);
+
+  const saveSession = (s) => {
+    setSession(s);
+    if (s) localStorage.setItem(CLOUD_SESSION_KEY, JSON.stringify(s));
+    else localStorage.removeItem(CLOUD_SESSION_KEY);
+  };
+
+  const refreshStatus = useCallback((s) => {
+    if (!s) return;
+    cloudApi.status({ access_token: s.access_token, refresh_token: s.refresh_token })
+      .then(res => setLastBackup(res.data.last_backup))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { refreshStatus(session); }, [session, refreshStatus]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      if (mode === 'signup') {
+        const res = await cloudApi.signup(email, password);
+        if (res.data.access_token) {
+          saveSession({ access_token: res.data.access_token, refresh_token: res.data.refresh_token, email: res.data.email });
+          setNotice('Compte créé et connecté.');
+        } else {
+          setNotice(res.data.message);
+        }
+      } else {
+        const res = await cloudApi.login(email, password);
+        saveSession({ access_token: res.data.access_token, refresh_token: res.data.refresh_token, email: res.data.email });
+      }
+      setPassword('');
+    } catch (e2) {
+      setError(errText(e2));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const logout = () => { saveSession(null); setLastBackup(null); };
+
+  const doBackup = async () => {
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      await cloudApi.backup({ access_token: session.access_token, refresh_token: session.refresh_token });
+      setNotice('Sauvegarde envoyée.');
+      refreshStatus(session);
+    } catch (e2) {
+      setError(errText(e2));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doRestore = async () => {
+    if (!window.confirm('Restaurer la dernière sauvegarde cloud ? Cela remplace le journal local actuel (une copie de sécurité est gardée sur le disque).')) return;
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      await cloudApi.restore({ access_token: session.access_token, refresh_token: session.refresh_token });
+      setNotice('Restauré. Rechargement...');
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (e2) {
+      setError(errText(e2));
+      setBusy(false);
+    }
+  };
+
+  if (!session) {
+    return (
+      <div className="card" style={{ padding: 'var(--space-5)', maxWidth: 420 }}>
+        <h3 style={{ marginTop: 0 }}>{mode === 'signup' ? 'Créer un compte' : 'Se connecter'}</h3>
+        <p className="text-muted" style={{ fontSize: 13, marginBottom: 'var(--space-4)' }}>
+          Lie le journal à une adresse email pour pouvoir le sauvegarder et le
+          restaurer depuis un autre ordinateur.
+        </p>
+        <form onSubmit={submit} className="settings-form" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+          <label>
+            <span className="field-label">Email</span>
+            <input type="email" required autoFocus value={email} onChange={e => setEmail(e.target.value)} />
+          </label>
+          <label>
+            <span className="field-label">Mot de passe</span>
+            <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} />
+          </label>
+          <div className="settings-form-actions">
+            <button type="submit" className="btn btn-primary btn-sm" disabled={busy}>
+              {mode === 'signup' ? 'Créer le compte' : 'Se connecter'}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setMode(m => m === 'signup' ? 'login' : 'signup'); setError(null); }}>
+              {mode === 'signup' ? "J'ai déjà un compte" : 'Créer un compte'}
+            </button>
+          </div>
+          {error && <div className="notice neg" role="alert">{error}</div>}
+          {notice && <div className="notice pos" role="status">{notice}</div>}
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card" style={{ padding: 'var(--space-5)', maxWidth: 480 }}>
+      <h3 style={{ marginTop: 0 }}>Connecté</h3>
+      <p className="text-muted" style={{ fontSize: 13 }}>{session.email}</p>
+      <p className="text-muted" style={{ fontSize: 13 }}>
+        Dernière sauvegarde : {lastBackup ? new Date(lastBackup).toLocaleString('fr-FR') : 'aucune'}
+      </p>
+      {error && <div className="notice neg" role="alert" style={{ marginBottom: 12 }}>{error}</div>}
+      {notice && <div className="notice pos" role="status" style={{ marginBottom: 12 }}>{notice}</div>}
+      <div className="settings-form-actions">
+        <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={doBackup}>Sauvegarder maintenant</button>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={doRestore}>Restaurer dernière sauvegarde</button>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={logout}>Se déconnecter</button>
+      </div>
+    </div>
+  );
+}
 
 /** General app settings: currently just the CSV import timezone. */
 function GeneralSettings() {
@@ -313,7 +453,7 @@ function GeneralSettings() {
     setNotice(null);
     try {
       await appSettingsApi.put({ import_timezone: value });
-      setNotice('Saved. Trades reimported from now on will use this timezone.');
+      setNotice('Enregistré. Les trades réimportés à partir de maintenant utiliseront ce fuseau horaire.');
     } catch (e) {
       setLoadError(errText(e));
     } finally {
@@ -323,14 +463,16 @@ function GeneralSettings() {
 
   return (
     <div className="card" style={{ padding: 'var(--space-5)', maxWidth: 560 }}>
-      <h3 style={{ marginTop: 0 }}>Import timezone</h3>
+      <h3 style={{ marginTop: 0 }}>Fuseau horaire d'import</h3>
       <p className="text-muted" style={{ fontSize: 13, marginBottom: 'var(--space-4)' }}>
-        Thinkorswim's CSV export stamps fill times using the desktop app's local
-        system clock, not exchange time. Set the timezone your trading computer
-        runs in — the journal converts every imported fill to US Eastern time
-        so it lines up correctly with the price charts and hold-time math.
-        This only affects trades imported after you change it; already-imported
-        trades keep their existing times.
+        L'export CSV de Thinkorswim horodate les exécutions avec l'horloge
+        système locale de l'application de bureau, pas l'heure de la Bourse.
+        Réglez le fuseau horaire de l'ordinateur sur lequel vous tradez —
+        le journal convertit chaque exécution importée à l'heure de l'Est US
+        pour qu'elle corresponde correctement aux graphiques de prix et au
+        calcul de durée de détention. Cela n'affecte que les trades importés
+        après ce changement ; les trades déjà importés gardent leurs horaires
+        existants.
       </p>
 
       {loadError && <div className="notice neg" role="alert" style={{ marginBottom: 12 }}>{loadError}</div>}
@@ -343,11 +485,11 @@ function GeneralSettings() {
           value={timezone}
           disabled={saving}
           onChange={e => save(e.target.value)}
-          aria-label="Import timezone"
+          aria-label="Fuseau horaire d'import"
           style={{ fontSize: 14, padding: '8px 12px', minWidth: 320 }}
         >
           {!TIMEZONE_OPTIONS.some(o => o.value === timezone) && timezone && (
-            <option value={timezone}>{timezone} (custom)</option>
+            <option value={timezone}>{timezone} (personnalisé)</option>
           )}
           {TIMEZONE_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -384,11 +526,11 @@ export default function Settings() {
   return (
     <div>
       <PageHeader
-        title="Settings"
-        subtitle="Clean up the names the journal uses. Renames and merges update every trade that uses the name."
+        title="Réglages"
+        subtitle="Nettoyez les noms utilisés par le journal. Les renommages et fusions mettent à jour chaque trade qui utilise le nom."
       />
 
-      <div className="tabs" role="tablist" aria-label="Settings sections" style={{ marginBottom: 'var(--space-5)' }}>
+      <div className="tabs" role="tablist" aria-label="Sections des réglages" style={{ marginBottom: 'var(--space-5)' }}>
         {SECTIONS.map(s => (
           <button
             type="button"
@@ -403,7 +545,7 @@ export default function Settings() {
             onKeyDown={onTabKey}
           >
             {s.label}
-            {lib && s.id !== 'general' && (
+            {lib && s.id !== 'general' && s.id !== 'account' && (
               <span className="text-muted num" style={{ marginLeft: 6, fontWeight: 500 }}>
                 {s.id === 'tag'
                   ? TAG_TYPE_ORDER.reduce((n, t) => n + (lib.tags?.[t]?.length || 0), 0)
@@ -416,8 +558,9 @@ export default function Settings() {
 
       <div role="tabpanel" id="settings-panel" aria-labelledby={`settings-tab-${section}`}>
         {section === 'general' && <GeneralSettings />}
-        {section !== 'general' && loadError && <div className="notice neg" role="alert">{loadError}</div>}
-        {section !== 'general' && !lib && !loadError && <div className="skeleton" style={{ height: 320 }} />}
+        {section === 'account' && <CloudAccount />}
+        {section !== 'general' && section !== 'account' && loadError && <div className="notice neg" role="alert">{loadError}</div>}
+        {section !== 'general' && section !== 'account' && !lib && !loadError && <div className="skeleton" style={{ height: 320 }} />}
 
         {lib && section === 'strategy' && (
           <ItemList kind="strategy" {...SECTION_COPY.strategy} items={lib.strategies} onChanged={load} />
@@ -432,8 +575,8 @@ export default function Settings() {
                 key={t}
                 kind="tag"
                 tagType={t}
-                title={`${TAG_TYPE_LABEL[t]} tags`}
-                noun="tag"
+                title={`Tags : ${TAG_TYPE_LABEL[t]}`}
+                noun="un tag"
                 items={lib.tags?.[t] || []}
                 onChanged={load}
               />

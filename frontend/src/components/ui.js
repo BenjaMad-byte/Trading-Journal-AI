@@ -56,10 +56,10 @@ export function GoalMeter({ value, goal, label }) {
   return (
     <div className="kpi-goal">
       <div className="kpi-goal-row">
-        <span className={hit ? 'met' : undefined}>{hit ? '✓ Goal met' : `${Math.round(pct)}% of goal`}</span>
-        <span>Goal {label}</span>
+        <span className={hit ? 'met' : undefined}>{hit ? '✓ Objectif atteint' : `${Math.round(pct)}% de l'objectif`}</span>
+        <span>Objectif {label}</span>
       </div>
-      <div className="meter" role="img" aria-label={hit ? `Goal ${label} met` : `${Math.round(pct)}% of goal ${label}`}>
+      <div className="meter" role="img" aria-label={hit ? `Objectif ${label} atteint` : `${Math.round(pct)}% de l'objectif ${label}`}>
         <span className={hit ? 'met' : undefined} style={{ width: `${Math.max(pct, 0)}%` }} />
       </div>
     </div>
@@ -84,7 +84,7 @@ export function DeltaLine({ curr, prev, type = 'number', neutral = false }) {
     label = `${up ? '↑ +' : '↓ '}${Math.abs(delta).toFixed(2)}`;
   }
   const cls = neutral ? 'text-purple' : up ? 'pos' : 'neg';
-  return <div className={`kpi-delta ${cls}`}>{label} vs prev</div>;
+  return <div className={`kpi-delta ${cls}`}>{label} vs préc.</div>;
 }
 
 /** "+$1,234.56" / "-$1,234.56" with the sign always explicit. */

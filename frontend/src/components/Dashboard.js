@@ -5,7 +5,7 @@ import DashboardRender from '../v3/DashboardRender';
 import {
   PageHeader, } from './ui';
 
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_SHORT = ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
 const fmtLong = (d) => {
   if (!d) return '';
   const [y, m, day] = d.split('-');
@@ -15,11 +15,11 @@ const fmtLong = (d) => {
 // ── Goals Panel ───────────────────────────────────────────────────────────────
 
 const GOAL_FIELDS = [
-  { key: 'win_rate',         label: 'Trade Win %',     suffix: '%',  step: 1,   min: 0, max: 100 },
-  { key: 'profit_factor',    label: 'Profit Factor',   suffix: '',   step: 0.1, min: 0 },
-  { key: 'day_win_rate',     label: 'Day Win %',       suffix: '%',  step: 1,   min: 0, max: 100 },
-  { key: 'expectancy',       label: 'Expectancy ($)',  prefix: '$',  suffix: '', step: 5, min: 0 },
-  { key: 'avg_win_loss_ratio', label: 'Avg W/L Ratio', suffix: '',  step: 0.1, min: 0 },
+  { key: 'win_rate',         label: 'Taux de réussite trade %',  suffix: '%',  step: 1,   min: 0, max: 100 },
+  { key: 'profit_factor',    label: 'Facteur de profit',         suffix: '',   step: 0.1, min: 0 },
+  { key: 'day_win_rate',     label: 'Taux de réussite jour %',   suffix: '%',  step: 1,   min: 0, max: 100 },
+  { key: 'expectancy',       label: 'Espérance ($)',             prefix: '$',  suffix: '', step: 5, min: 0 },
+  { key: 'avg_win_loss_ratio', label: 'Ratio Gain/Perte moyen',  suffix: '',  step: 0.1, min: 0 },
 ];
 
 function GoalsPanel({ draft, onChange, onSave, onCancel, accountLabel, saving, error }) {
@@ -27,17 +27,17 @@ function GoalsPanel({ draft, onChange, onSave, onCancel, accountLabel, saving, e
     <section className="card" style={{ marginBottom: 20, boxShadow: 'inset 0 0 0 1px var(--accent-line-soft), var(--shadow-card)' }} aria-labelledby="goals-title">
       <div className="panel-head" style={{ marginBottom: 14 }}>
         <div>
-          <h2 id="goals-title" className="section-title">Goals</h2>
-          <div className="section-sub">Applies to {accountLabel}</div>
+          <h2 id="goals-title" className="section-title">Objectifs</h2>
+          <div className="section-sub">S'applique à {accountLabel}</div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>Cancel</button>
-          <button type="button" className="btn btn-primary" onClick={onSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
+          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>Annuler</button>
+          <button type="button" className="btn btn-primary" onClick={onSave} disabled={saving}>{saving ? 'Enregistrement…' : 'Enregistrer'}</button>
         </div>
       </div>
       {error && (
         <div className="notice neg" role="alert" style={{ marginBottom: 14 }}>
-          Could not save goals: {error}. Your edits are still here, try again.
+          Impossible d'enregistrer les objectifs : {error}. Vos modifications sont toujours là, réessaie.
         </div>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
@@ -142,10 +142,10 @@ export default function Dashboard({ accountId, accounts = [], selectedAccountId,
     if (!closingPos || !closePrice || !closeDate) return;
     const price = parseFloat(closePrice);
     const commission = closeCommission === '' ? 0 : parseFloat(closeCommission);
-    if (!(price > 0)) { setCloseError('Enter an exit price above 0.'); return; }
-    if (Number.isNaN(commission) || commission < 0) { setCloseError('Fees cannot be negative.'); return; }
+    if (!(price > 0)) { setCloseError('Entre un prix de sortie supérieur à 0.'); return; }
+    if (Number.isNaN(commission) || commission < 0) { setCloseError('Les frais ne peuvent pas être négatifs.'); return; }
     if (closingPos.lastFillDate && closeDate < closingPos.lastFillDate) {
-      setCloseError(`The exit cannot be earlier than the last fill on ${closingPos.lastFillDate}.`);
+      setCloseError(`La sortie ne peut pas être antérieure au dernier remplissage du ${closingPos.lastFillDate}.`);
       return;
     }
     setCloseSubmitting(true);
@@ -198,7 +198,7 @@ export default function Dashboard({ accountId, accounts = [], selectedAccountId,
 
   const accountLabel = (() => {
     const a = accounts.find(x => x.id === selectedAccountId);
-    return a ? a.name : 'All Accounts';
+    return a ? a.name : 'Tous les comptes';
   })();
 
   const { daily_pnl = [] } = kpis || {};
@@ -209,7 +209,7 @@ export default function Dashboard({ accountId, accounts = [], selectedAccountId,
   if (error) return (
     <div>
       <PageHeader
-        title="Dashboard"
+        title="Tableau de bord"
         subtitle={accountLabel}
         actions={<DateRangePicker
           dateFrom={dateFrom}
@@ -218,8 +218,8 @@ export default function Dashboard({ accountId, accounts = [], selectedAccountId,
         />}
       />
       <div className="notice neg" role="alert" style={{ alignItems: 'center' }}>
-        <span style={{ flex: 1 }}>Could not load the dashboard: {error}. No trades were changed.</span>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={reload}>Retry</button>
+        <span style={{ flex: 1 }}>Impossible de charger le tableau de bord : {error}. Aucun trade n'a été modifié.</span>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={reload}>Réessayer</button>
       </div>
     </div>
   );
@@ -227,7 +227,7 @@ export default function Dashboard({ accountId, accounts = [], selectedAccountId,
   return (
     <div>
       {loading ? (
-        <div className="v3-band"><div className="v3-empty">Loading…</div></div>
+        <div className="v3-band"><div className="v3-empty">Chargement…</div></div>
       ) : (
         <DashboardRender
           kpis={kpis}

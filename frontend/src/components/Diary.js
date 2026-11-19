@@ -10,12 +10,12 @@ function ConfidenceDot({ level }) {
     <span
       className={`confidence-dot confidence-${level || 'unmatched'}`}
       style={{ marginRight: 6 }}
-      title={`Match: ${level}`}
+      title={`Correspondance : ${level}`}
     />
   );
 }
 
-function DeleteButton({ onDelete, small, label = 'Delete' }) {
+function DeleteButton({ onDelete, small, label = 'Supprimer' }) {
   const [confirm, setConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -35,14 +35,14 @@ function DeleteButton({ onDelete, small, label = 'Delete' }) {
           disabled={deleting}
           className="btn btn-danger btn-sm"
         >
-          {deleting ? '…' : 'Confirm'}
+          {deleting ? '…' : 'Confirmer'}
         </button>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); setConfirm(false); }}
           className="btn btn-ghost btn-sm"
         >
-          Cancel
+          Annuler
         </button>
       </span>
     );
@@ -97,7 +97,7 @@ function DiaryCard({ entry, onDeleted }) {
           {/* Summary */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span className="num" style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Entry #{entry.id}</span>
+              <span className="num" style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Entrée n°{entry.id}</span>
               {analysis && (
                 <span className="chip">
                   <span className="num">{analysis.trade_analyses?.length || 0}</span>&nbsp;trades
@@ -109,14 +109,14 @@ function DiaryCard({ entry, onDeleted }) {
                 {analysis.overall_summary}
               </div>
             ) : (
-              <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 6 }}>No AI analysis available.</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 6 }}>Aucune analyse IA disponible.</div>
             )}
           </div>
           <span style={{ color: 'var(--text-secondary)', paddingTop: 2 }} aria-hidden="true">
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </span>
         </button>
-        <DeleteButton label={`Delete diary entry ${entry.id}`} onDelete={() => diaryApi.delete(entry.id).then(() => onDeleted(entry.id))} />
+        <DeleteButton label={`Supprimer l'entrée de journal ${entry.id}`} onDelete={() => diaryApi.delete(entry.id).then(() => onDeleted(entry.id))} />
       </div>
 
       {expanded && analysis && (
@@ -126,7 +126,7 @@ function DiaryCard({ entry, onDeleted }) {
             <div style={{ marginBottom: 16, textAlign: 'center' }}>
               <img
                 src={`${BACKEND}/uploads/${entry.image_path}`}
-                alt={`Diary entry ${entry.id}`}
+                alt={`Entrée de journal ${entry.id}`}
                 style={{ maxWidth: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--divider)' }}
               />
             </div>
@@ -135,7 +135,7 @@ function DiaryCard({ entry, onDeleted }) {
           <div className="grid-2" style={{ marginBottom: 16 }}>
             {analysis.patterns_identified?.length > 0 && (
               <div>
-                <h3 style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Patterns Identified</h3>
+                <h3 style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Patterns identifiés</h3>
                 <ul style={{ paddingLeft: 20, color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.75 }}>
                   {analysis.patterns_identified.map((p, i) => <li key={i}>{p}</li>)}
                 </ul>
@@ -143,7 +143,7 @@ function DiaryCard({ entry, onDeleted }) {
             )}
             {analysis.improvement_areas?.length > 0 && (
               <div>
-                <h3 style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Improvement Areas</h3>
+                <h3 style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Axes d'amélioration</h3>
                 <ul style={{ paddingLeft: 20, color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.75 }}>
                   {analysis.improvement_areas.map((a, i) => <li key={i}>{a}</li>)}
                 </ul>
@@ -153,7 +153,7 @@ function DiaryCard({ entry, onDeleted }) {
 
           {analysis.trade_analyses?.length > 0 && (
             <div>
-              <h3 style={{ fontWeight: 600, marginBottom: 12, fontSize: 16 }}>Trade Analyses</h3>
+              <h3 style={{ fontWeight: 600, marginBottom: 12, fontSize: 16 }}>Analyses de trades</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {analysis.trade_analyses.map((ta, i) => (
                   <div key={i} style={{ background: 'var(--surface-inset)', border: '1px solid var(--divider-soft)', borderRadius: 'var(--radius-md)', padding: '14px 16px' }}>
@@ -169,25 +169,25 @@ function DiaryCard({ entry, onDeleted }) {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, fontSize: 14, lineHeight: 1.5 }}>
                       {ta.entry_reason && (
                         <div>
-                          <div style={fieldLabel}>Entry Reason</div>
+                          <div style={fieldLabel}>Raison d'entrée</div>
                           <div>{ta.entry_reason}</div>
                         </div>
                       )}
                       {ta.exit_reason && (
                         <div>
-                          <div style={fieldLabel}>Exit Reason</div>
+                          <div style={fieldLabel}>Raison de sortie</div>
                           <div>{ta.exit_reason}</div>
                         </div>
                       )}
                       {ta.emotional_state && (
                         <div>
-                          <div style={fieldLabel}>Emotional State</div>
+                          <div style={fieldLabel}>État émotionnel</div>
                           <div>{ta.emotional_state}</div>
                         </div>
                       )}
                       {ta.r_multiple != null && (
                         <div>
-                          <div style={fieldLabel}>R Multiple</div>
+                          <div style={fieldLabel}>Multiple R</div>
                           <div className={`num ${ta.r_multiple >= 0 ? 'pos' : 'neg'}`} style={{ fontWeight: 600 }}>
                             {ta.r_multiple > 0 ? '+' : ''}{Number(ta.r_multiple).toFixed(2)}R
                           </div>
@@ -195,7 +195,7 @@ function DiaryCard({ entry, onDeleted }) {
                       )}
                       {ta.mistakes && (
                         <div>
-                          <div style={fieldLabel}>Mistakes</div>
+                          <div style={fieldLabel}>Erreurs</div>
                           <div className="neg">{ta.mistakes}</div>
                         </div>
                       )}
@@ -245,10 +245,10 @@ export default function Diary({ accountId }) {
   return (
     <div>
       <PageHeader
-        title="Diary"
+        title="Journal"
         subtitle={!loading && entries.length > 0
-          ? <><span className="num">{entries.length}</span> {entries.length === 1 ? 'entry' : 'entries'} across <span className="num">{dates.length}</span> {dates.length === 1 ? 'day' : 'days'}</>
-          : 'AI readings of your trading notes, newest first'}
+          ? <><span className="num">{entries.length}</span> {entries.length === 1 ? 'entrée' : 'entrées'} sur <span className="num">{dates.length}</span> {dates.length === 1 ? 'jour' : 'jours'}</>
+          : 'Lectures IA de vos notes de trading, les plus récentes en premier'}
       />
 
       {loading && (
@@ -264,24 +264,24 @@ export default function Diary({ accountId }) {
       {!loading && entries.length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: 48, color: 'var(--text-secondary)' }}>
           <BookOpen size={40} style={{ marginBottom: 16, opacity: 0.6 }} />
-          <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>No diary entries yet</div>
-          <div style={{ fontSize: 14 }}>Upload a diary screenshot on the Import page to get started.</div>
+          <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>Aucune entrée de journal pour l'instant</div>
+          <div style={{ fontSize: 14 }}>Importez une capture d'écran de votre journal depuis la page Importer pour commencer.</div>
         </div>
       )}
 
       {dates.map(date => (
-        <section key={date} style={{ marginBottom: 'var(--space-6)' }} aria-label={`Diary entries for ${date}`}>
+        <section key={date} style={{ marginBottom: 'var(--space-6)' }} aria-label={`Entrées de journal pour le ${date}`}>
           {/* Date group header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <h2 className="section-title num">{date}</h2>
               <span className="chip">
-                <span className="num">{byDate[date].length}</span>&nbsp;{byDate[date].length === 1 ? 'entry' : 'entries'}
+                <span className="num">{byDate[date].length}</span>&nbsp;{byDate[date].length === 1 ? 'entrée' : 'entrées'}
               </span>
             </div>
             {byDate[date].length > 1 && (
               <DeleteButton
-                label={`Delete all diary entries for ${date}`}
+                label={`Supprimer toutes les entrées de journal du ${date}`}
                 onDelete={() => diaryApi.deleteByDate(date, accountId).then(() => removeDate(date))}
                 small
               />

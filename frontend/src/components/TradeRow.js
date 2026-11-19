@@ -12,7 +12,7 @@ function ConfidenceDot({ level }) {
   return (
     <span
       className={`confidence-dot confidence-${level || 'unmatched'}`}
-      title={`Match confidence: ${level || 'unmatched'}`}
+      title={`Confiance de correspondance : ${level || 'unmatched'}`}
     />
   );
 }
@@ -29,8 +29,8 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
 
   const handleDelete = async (e) => {
     e.stopPropagation();
-    const label = `${trade.ticker} on ${trade.date}`;
-    if (!window.confirm(`Delete this trade (${label})? This removes the trade and all its buy/sell executions permanently.`)) {
+    const label = `${trade.ticker} le ${trade.date}`;
+    if (!window.confirm(`Supprimer ce trade (${label}) ? Cela supprime le trade et toutes ses exécutions d'achat/vente définitivement.`)) {
       return;
     }
     setDeleting(true);
@@ -38,7 +38,7 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
       await tradesApi.delete(trade.id);
       if (onTradeDeleted) await onTradeDeleted();
     } catch (err) {
-      alert('Could not delete trade: ' + (err?.response?.data?.detail || err.message));
+      alert('Impossible de supprimer le trade : ' + (err?.response?.data?.detail || err.message));
       setDeleting(false);
     }
   };
@@ -56,14 +56,14 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
     });
 
     if (trade.instrument_type && trade.instrument_type !== 'STOCK') {
-      return <span className="text-faint" style={{ fontSize: 13 }} title="Setups are tagged on stock trades only">—</span>;
+      return <span className="text-faint" style={{ fontSize: 13 }} title="Les setups ne sont tagués que sur les trades actions">—</span>;
     }
 
     const save = async (value) => {
       if (value === ADD_NEW) {
         const name = window.prompt(
-          'Name your setup, e.g. "Bookmap absorption read".\n\n'
-          + 'It gets added to the dropdown for every trade.');
+          'Nommez votre setup, par ex. "Lecture d\'absorption Bookmap".\n\n'
+          + 'Il sera ajouté au menu déroulant pour chaque trade.');
         if (!name || !name.trim()) { setEditing(false); return; }
         setSaving(true);
         try {
@@ -71,7 +71,7 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
           if (onCustomSetupsChanged) await onCustomSetupsChanged();
           value = name.trim();
         } catch (e) {
-          alert('Could not add setup: ' + (e?.response?.data?.detail || e.message));
+          alert('Impossible d\'ajouter le setup : ' + (e?.response?.data?.detail || e.message));
           setSaving(false); setEditing(false); return;
         }
       }
@@ -86,7 +86,7 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
         });
         setEditing(false);
       } catch (e) {
-        alert('Could not save setup: ' + (e?.response?.data?.detail || e.message));
+        alert('Impossible d\'enregistrer le setup : ' + (e?.response?.data?.detail || e.message));
       } finally {
         setSaving(false);
       }
@@ -97,14 +97,14 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
         <select
           autoFocus
           disabled={saving}
-          aria-label={`Setup for ${trade.ticker} on ${trade.date}`}
+          aria-label={`Setup pour ${trade.ticker} le ${trade.date}`}
           defaultValue={local.setup === 'NONE' ? 'NONE' : (local.setup || '')}
           onChange={e => save(e.target.value)}
           onBlur={() => setEditing(false)}
           onKeyDown={e => { if (e.key === 'Escape') setEditing(false); }}
           style={{ fontSize: 13, padding: '4px 8px', minHeight: 32, maxWidth: 260, borderColor: 'var(--accent-line)' }}
         >
-          <option value="">(clear tag)</option>
+          <option value="">(effacer le tag)</option>
           {customSetups.length > 0 && (
             <optgroup label="Playbook">
               {customSetups.map(cs => (
@@ -114,9 +114,9 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
               ))}
             </optgroup>
           )}
-          <optgroup label="Other">
-            <option value="NONE">No setup</option>
-            <option value={ADD_NEW}>+ Add a new setup…</option>
+          <optgroup label="Autre">
+            <option value="NONE">Aucun setup</option>
+            <option value={ADD_NEW}>+ Ajouter un nouveau setup…</option>
           </optgroup>
         </select>
       );
@@ -126,8 +126,8 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
       <button
         type="button"
         onClick={() => setEditing(true)}
-        title="Click to set the setup manually"
-        aria-label={`Setup: ${local.setup || trade.strategy || 'none'}. Change setup`}
+        title="Cliquez pour définir le setup manuellement"
+        aria-label={`Setup : ${local.setup || trade.strategy || 'aucun'}. Changer le setup`}
         style={{ background: 'none', border: 0, padding: '2px 0', display: 'inline-flex', alignItems: 'center', gap: 6, textAlign: 'left' }}
       >
         <SetupBadge
@@ -139,7 +139,7 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
         />
         {local.source === 'manual' && (
           <span
-            title="Manually tagged"
+            title="Tagué manuellement"
             className="text-faint"
             style={{ fontSize: 11 }}
           >
@@ -159,9 +159,9 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
     const effCls = eff == null ? 'text-muted'
       : eff >= 60 ? 'pos' : eff >= 35 ? 'caution' : 'neg';
     const title = [
-      `MFE  ${mfe >= 0 ? '+' : ''}${Number(mfe).toFixed(2)}%: best unrealised gain while open (the opportunity)`,
-      `MAE  ${Number(mae).toFixed(2)}%: worst unrealised loss while open (the heat taken)`,
-      eff != null ? `Exit efficiency ${Number(eff).toFixed(0)}%: share of the available move you captured` : null,
+      `MFE  ${mfe >= 0 ? '+' : ''}${Number(mfe).toFixed(2)}% : meilleur gain latent en position (l'opportunité)`,
+      `MAE  ${Number(mae).toFixed(2)}% : pire perte latente en position (la chaleur subie)`,
+      eff != null ? `Efficacité de sortie ${Number(eff).toFixed(0)}% : part du mouvement disponible captée` : null,
     ].filter(Boolean).join('\n');
     return (
       <span title={title} className="num" style={{ display: 'inline-flex', gap: 6, alignItems: 'baseline', fontSize: 13 }}>
@@ -181,13 +181,13 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
     C: 'caution', D: 'caution', F: 'text-faint',
   };
   const GRADE_MEANING = {
-    'A++': 'textbook execution',
-    'A+': 'excellent execution',
-    A: 'good execution, one minor slip',
-    B: 'solid, minor execution warnings',
-    C: 'one clear rule broken',
-    D: 'multiple rules broken',
-    F: 'no qualifying setup',
+    'A++': 'exécution exemplaire',
+    'A+': 'exécution excellente',
+    A: 'bonne exécution, un léger écart',
+    B: 'solide, quelques avertissements d\'exécution mineurs',
+    C: 'une règle clairement enfreinte',
+    D: 'plusieurs règles enfreintes',
+    F: 'aucun setup qualifiant',
   };
 
   function SetupBadge({ setup, grade, notes, strategy, source }) {
@@ -206,9 +206,9 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
     // Graded setups read as a chip; an ungraded one is just the name.
     const gradeCls = GRADE_CLASS[grade] || 'text-muted';
     const title = [
-      setup + '  (playbook setup)',
-      grade ? `Grade ${grade}${GRADE_MEANING[grade] ? `: ${GRADE_MEANING[grade]}` : ''}` : null,
-      strategy ? `Tagged strategy: ${strategy}` : null,
+      setup + '  (setup du playbook)',
+      grade ? `Note ${grade}${GRADE_MEANING[grade] ? ` : ${GRADE_MEANING[grade]}` : ''}` : null,
+      strategy ? `Stratégie taguée : ${strategy}` : null,
       violations.length ? '' : null,
       ...violations.map(v => `${v.severity === 'high' ? '✕' : '!'} ${v.msg}`),
     ].filter(x => x !== null).join('\n');
@@ -272,8 +272,8 @@ export default function TradeRow({ trade, openTime, onOpenDetail, customSetups =
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              title="Delete trade"
-              aria-label={`Delete trade ${trade.ticker} on ${trade.date}`}
+              title="Supprimer le trade"
+              aria-label={`Supprimer le trade ${trade.ticker} le ${trade.date}`}
               className="btn btn-ghost btn-icon"
               style={{ color: 'var(--result-neg)' }}
             >

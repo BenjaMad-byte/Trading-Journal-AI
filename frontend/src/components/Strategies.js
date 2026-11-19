@@ -41,7 +41,7 @@ export default function Strategies({ accountId }) {
 
   if (loading) return (
     <div>
-      <h2 style={{ marginBottom: 20, fontSize: 20, fontWeight: 700 }}>Strategies</h2>
+      <h2 style={{ marginBottom: 20, fontSize: 20, fontWeight: 700 }}>Stratégies</h2>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div className="skeleton" style={{ height: 300 }} />
         <div className="skeleton" style={{ height: 300 }} />
@@ -62,15 +62,15 @@ export default function Strategies({ accountId }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Strategies</h2>
+      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Stratégies</h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
 
         {/* P&L by Strategy */}
         <div className="card">
-          <div style={{ fontWeight: 600, marginBottom: 16 }}>P&L by Strategy</div>
+          <div style={{ fontWeight: 600, marginBottom: 16 }}>P&L par stratégie</div>
           {by_strategy.length === 0 ? (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No strategy data yet. Tag trades with a playbook setup on the Trade View; strategies extracted from diary entries also appear here.</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Aucune donnée de stratégie pour le moment. Tague les trades avec un setup de playbook dans Trades ; les stratégies extraites des entrées du journal apparaissent aussi ici.</div>
           ) : (
             <ResponsiveContainer width="100%" height={Math.max(180, by_strategy.length * 36)}>
               <BarChart data={by_strategy} layout="vertical">
@@ -82,7 +82,7 @@ export default function Strategies({ accountId }) {
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 6 }}
                   labelStyle={{ color: 'var(--text-muted)' }}
                 />
-                <Bar dataKey="net_pnl" name="Net P&L">
+                <Bar dataKey="net_pnl" name="P&L net">
                   {by_strategy.map((s, i) => (
                     <Cell key={i} fill={s.net_pnl >= 0 ? 'var(--green)' : 'var(--red)'} />
                   ))}
@@ -94,9 +94,9 @@ export default function Strategies({ accountId }) {
 
         {/* P&L by Instrument */}
         <div className="card">
-          <div style={{ fontWeight: 600, marginBottom: 16 }}>P&L by Instrument Type</div>
+          <div style={{ fontWeight: 600, marginBottom: 16 }}>P&L par type d'instrument</div>
           {instrData.length === 0 ? (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No instrument data yet.</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Aucune donnée d'instrument pour le moment.</div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -123,16 +123,16 @@ export default function Strategies({ accountId }) {
       {/* Win Rate Table */}
       {by_strategy.length > 0 && (
         <div className="card" style={{ marginBottom: 16 }}>
-          <div style={{ fontWeight: 600, marginBottom: 16 }}>Strategy Performance Table</div>
+          <div style={{ fontWeight: 600, marginBottom: 16 }}>Tableau de performance des stratégies</div>
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Strategy</th>
+                  <th>Stratégie</th>
                   <th style={{ textAlign: 'right' }}>Trades</th>
-                  <th style={{ textAlign: 'right' }}>Net P&L</th>
-                  <th style={{ textAlign: 'right' }}>Win Rate</th>
-                  <th style={{ textAlign: 'right' }}>Avg R</th>
+                  <th style={{ textAlign: 'right' }}>P&L net</th>
+                  <th style={{ textAlign: 'right' }}>Taux de réussite</th>
+                  <th style={{ textAlign: 'right' }}>R moyen</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,15 +160,15 @@ export default function Strategies({ accountId }) {
       {/* AI Insights */}
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontWeight: 600 }}>AI Coaching Insights</div>
+          <div style={{ fontWeight: 600 }}>Analyses de coaching IA</div>
           <button
             className="btn btn-primary"
             onClick={handleGenerateInsights}
             disabled={loadingInsights}
           >
             {loadingInsights
-              ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Generating...</>
-              : <><Sparkles size={16} /> Generate Insights</>
+              ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Génération...</>
+              : <><Sparkles size={16} /> Générer les analyses</>
             }
           </button>
         </div>
@@ -189,7 +189,7 @@ export default function Strategies({ accountId }) {
           </pre>
         ) : (
           <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-            Click "Generate Insights" to get personalized coaching feedback from Claude AI based on your trading data.
+            Clique sur "Générer les analyses" pour obtenir un retour de coaching personnalisé de l'IA Claude basé sur tes données de trading.
           </div>
         )}
       </div>

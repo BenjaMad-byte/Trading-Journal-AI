@@ -44,11 +44,11 @@ function MonthPanel({ accountId, onDayClick, latestDate }) {
       <div className="v3-cal-head">
         <h2 className="v3-cal-month">{MONTH_NAMES[month - 1]}<span>{year}</span></h2>
         <div className="v3-step">
-          <button type="button" onClick={prev} aria-label="Previous month">&lsaquo;</button>
-          <button type="button" onClick={next} aria-label="Next month">&rsaquo;</button>
+          <button type="button" onClick={prev} aria-label="Mois précédent">&lsaquo;</button>
+          <button type="button" onClick={next} aria-label="Mois suivant">&rsaquo;</button>
         </div>
         <div className="v3-cal-tot">
-          {all.length} session{all.length === 1 ? '' : 's'} traded
+          {all.length} séance{all.length === 1 ? '' : 's'} tradée{all.length === 1 ? '' : 's'}
           <b className={tone(total)}>{all.length ? moneyK(total) : ''}</b>
         </div>
       </div>
@@ -64,9 +64,9 @@ function Patterns({ edge, byStrategy, onViewAll }) {
   const [tab, setTab] = useState('tod');
   const [view, setView] = useState('bars');
   const tabs = [
-    { id: 'tod', label: 'Time of day' },
-    { id: 'dow', label: 'Day of week' },
-    { id: 'str', label: 'Strategy' },
+    { id: 'tod', label: 'Heure de la journée' },
+    { id: 'dow', label: 'Jour de la semaine' },
+    { id: 'str', label: 'Stratégie' },
   ];
 
   const rows = (() => {
@@ -77,7 +77,7 @@ function Patterns({ edge, byStrategy, onViewAll }) {
       return (edge?.day_of_week || []).map((r) => ({ name: r.day, n: r.trade_count, v: r.net_pnl }));
     }
     return (byStrategy || []).map((r) => ({
-      name: r.strategy || r.setup || 'Untagged', n: r.count, v: r.net_pnl, wr: r.win_rate, avgR: r.avg_r,
+      name: r.strategy || r.setup || 'Non taggé', n: r.count, v: r.net_pnl, wr: r.win_rate, avgR: r.avg_r,
     }));
   })();
 
@@ -89,34 +89,34 @@ function Patterns({ edge, byStrategy, onViewAll }) {
         <div>
           <h2 className="v3-h">Patterns</h2>
           <p className="v3-h-sub">
-            {tab === 'tod' && 'Net P&L by the hour you entered'}
-            {tab === 'dow' && 'Net P&L by weekday'}
-            {tab === 'str' && 'Net P&L by the strategy on the trade'}
+            {tab === 'tod' && 'P&L net par heure d\'entrée'}
+            {tab === 'dow' && 'P&L net par jour de la semaine'}
+            {tab === 'str' && 'P&L net par stratégie du trade'}
           </p>
         </div>
         <div className="v3-acts">
           <Seg
-            label="How to show this breakdown"
+            label="Comment afficher cette répartition"
             value={view}
             onChange={setView}
-            options={[{ id: 'bars', label: 'Bars' }, { id: 'table', label: 'Table' }]}
+            options={[{ id: 'bars', label: 'Barres' }, { id: 'table', label: 'Tableau' }]}
           />
-          <button type="button" className="btn btn-secondary btn-sm" onClick={onViewAll}>Full report</button>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={onViewAll}>Rapport complet</button>
         </div>
       </div>
-      <Tabs tabs={tabs} active={tab} onChange={setTab} label="Breakdown" />
+      <Tabs tabs={tabs} active={tab} onChange={setTab} label="Répartition" />
       {!rows.length ? (
-        <div className="v3-empty">Nothing recorded in this range.</div>
+        <div className="v3-empty">Rien d'enregistré sur cette période.</div>
       ) : (
         <div className="v3-scroll">
           <table className="v3-t">
             <thead>
               <tr>
-                <th>{tab === 'tod' ? 'Hour' : tab === 'dow' ? 'Day' : 'Strategy'}</th>
+                <th>{tab === 'tod' ? 'Heure' : tab === 'dow' ? 'Jour' : 'Stratégie'}</th>
                 <th className="r">Trades</th>
-                {tab === 'str' && <th className="r">Win rate</th>}
-                {view === 'table' && <th className="r">Avg / trade</th>}
-                {view === 'table' && tab === 'str' && <th className="r v3-hide-s">Avg R</th>}
+                {tab === 'str' && <th className="r">Taux de réussite</th>}
+                {view === 'table' && <th className="r">Moy. / trade</th>}
+                {view === 'table' && tab === 'str' && <th className="r v3-hide-s">Moy. R</th>}
                 {view === 'bars' && <th>Net</th>}
                 <th className="r">Total</th>
               </tr>
@@ -166,8 +166,8 @@ function OpenPositions(p) {
     <div className="v3-subband">
       <div className="v3-sec-head">
         <div>
-          <h2 className="v3-h">Open positions</h2>
-          <p className="v3-h-sub">Recording an exit journals it, it does not place an order</p>
+          <h2 className="v3-h">Positions ouvertes</h2>
+          <p className="v3-h-sub">Enregistrer une sortie la journalise, cela ne passe pas d'ordre</p>
         </div>
         <span className={`v3-chip${openPositions?.length ? ' caution' : ''}`}>
           {openPositions?.length || 0} position{openPositions?.length === 1 ? '' : 's'}
@@ -175,16 +175,16 @@ function OpenPositions(p) {
       </div>
 
       {!openPositions?.length ? (
-        <div className="v3-empty">No open positions.</div>
+        <div className="v3-empty">Aucune position ouverte.</div>
       ) : (
         <div className="v3-scroll">
           <table className="v3-t">
             <thead>
               <tr>
-                <th>Ticker</th>
-                <th className="v3-hide-s">Side</th>
-                <th className="r">Remaining</th>
-                <th className="r">Avg entry</th>
+                <th>Symbole</th>
+                <th className="v3-hide-s">Côté</th>
+                <th className="r">Restant</th>
+                <th className="r">Entrée moy.</th>
                 <th className="r"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
@@ -208,13 +208,13 @@ function OpenPositions(p) {
                     tabIndex={0}
                     onClick={open}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } }}
-                    aria-label={`Open ${pos.ticker} position`}
+                    aria-label={`Ouvrir la position ${pos.ticker}`}
                   >
                     <td className="v3-tick">{pos.ticker}</td>
                     <td className="v3-hide-s v3-side">{side === 'LONG' ? 'Long' : 'Short'}</td>
                     <td className="r v3-mono">
                       {remainingQty}
-                      {exitQty > 0 && <span className="v3-read"> of {totalQty}</span>}
+                      {exitQty > 0 && <span className="v3-read"> sur {totalQty}</span>}
                     </td>
                     <td className="r v3-mono">
                       ${avgEntry.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -226,7 +226,7 @@ function OpenPositions(p) {
                         onClick={(e) => { e.stopPropagation(); openCloseModal(pos); }}
                         onKeyDown={(e) => e.stopPropagation()}
                       >
-                        Close
+                        Fermer
                       </button>
                     </td>
                   </tr>
@@ -238,39 +238,39 @@ function OpenPositions(p) {
       )}
 
       {closingPos && (
-        <div className="v3-notice" style={{ marginTop: 16, display: 'block' }} role="group" aria-label={`Close ${closingPos.ticker}`}>
+        <div className="v3-notice" style={{ marginTop: 16, display: 'block' }} role="group" aria-label={`Fermer ${closingPos.ticker}`}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <span style={{ fontWeight: 600, fontSize: 14 }}>
-              Record exit: {closingPos.ticker} {closingPos.side} ({closingPos.openQty} remaining)
+              Enregistrer la sortie : {closingPos.ticker} {closingPos.side} ({closingPos.openQty} restant)
             </span>
-            <button type="button" className="btn btn-ghost btn-icon" onClick={() => setClosingPos(null)} aria-label="Cancel closing position">
+            <button type="button" className="btn btn-ghost btn-icon" onClick={() => setClosingPos(null)} aria-label="Annuler la fermeture de la position">
               <X size={14} />
             </button>
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div>
-              <label className="field-label" htmlFor="close-date">Exit date</label>
+              <label className="field-label" htmlFor="close-date">Date de sortie</label>
               <input id="close-date" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: 148 }} />
             </div>
             <div>
-              <label className="field-label" htmlFor="close-time">Exit time</label>
+              <label className="field-label" htmlFor="close-time">Heure de sortie</label>
               <input id="close-time" type="time" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} style={{ width: 118 }} />
             </div>
             <div>
-              <label className="field-label" htmlFor="close-price">Exit price</label>
+              <label className="field-label" htmlFor="close-price">Prix de sortie</label>
               <input id="close-price" type="number" step="0.01" placeholder="0.00" value={closePrice}
                 onChange={(e) => setClosePrice(e.target.value)} style={{ width: 118 }}
                 onKeyDown={(e) => e.key === 'Enter' && handleClosePosition()} />
             </div>
             <div>
-              <label className="field-label" htmlFor="close-comm">Fees</label>
+              <label className="field-label" htmlFor="close-comm">Commissions</label>
               <input id="close-comm" type="number" step="0.01" min="0" value={closeCommission}
                 onChange={(e) => setCloseCommission(e.target.value)} style={{ width: 96 }}
                 onKeyDown={(e) => e.key === 'Enter' && handleClosePosition()} />
             </div>
             <button type="button" className="btn btn-primary" onClick={handleClosePosition}
               disabled={closeSubmitting || !closePrice || !closeDate}>
-              {closeSubmitting ? 'Saving…' : 'Record exit'}
+              {closeSubmitting ? 'Enregistrement…' : 'Enregistrer la sortie'}
             </button>
           </div>
           {closeError && <div className="notice neg" role="alert" style={{ marginTop: 12 }}>{closeError}</div>}
@@ -321,46 +321,46 @@ export default function DashboardRender(p) {
 
   const measures = [
     {
-      label: 'Trade win rate', value: `${(k.win_rate || 0).toFixed(1)}%`,
+      label: 'Taux de réussite des trades', value: `${(k.win_rate || 0).toFixed(1)}%`,
       fill: cap((k.win_rate || 0) / 100), goal: `${gWin}%`, goalPct: cap(gWin / 100) * 100,
       met: (k.win_rate || 0) >= gWin,
-      read: `${(k.winning_trades || 0).toLocaleString()} won, ${(k.losing_trades || 0).toLocaleString()} lost`,
+      read: `${(k.winning_trades || 0).toLocaleString()} gagnés, ${(k.losing_trades || 0).toLocaleString()} perdus`,
     },
     {
-      label: 'Day win rate', value: `${(k.day_win_rate || 0).toFixed(1)}%`,
+      label: 'Taux de réussite journalier', value: `${(k.day_win_rate || 0).toFixed(1)}%`,
       fill: cap((k.day_win_rate || 0) / 100), goal: `${gDay}%`, goalPct: cap(gDay / 100) * 100,
       met: (k.day_win_rate || 0) >= gDay,
-      read: `${k.positive_days || 0} green days, ${(k.trading_days || 0) - (k.positive_days || 0)} red`,
+      read: `${k.positive_days || 0} jours verts, ${(k.trading_days || 0) - (k.positive_days || 0)} rouges`,
     },
     {
-      label: 'Profit factor',
+      label: 'Facteur de profit',
       value: k.profit_factor == null ? '—' : Number(k.profit_factor).toFixed(2),
       fill: cap((k.profit_factor || 0) / gPf), goal: Number(gPf).toFixed(2), goalPct: 100,
       met: (k.profit_factor || 0) >= gPf,
-      read: `$${Number(k.profit_factor || 0).toFixed(2)} won for every $1.00 lost`,
+      read: `$${Number(k.profit_factor || 0).toFixed(2)} gagné pour chaque $1,00 perdu`,
     },
     {
-      label: 'Win / loss size', value: ratio == null ? '—' : ratio.toFixed(2),
+      label: 'Taille gain / perte', value: ratio == null ? '—' : ratio.toFixed(2),
       fill: cap((ratio || 0) / gRatio), goal: Number(gRatio).toFixed(2), goalPct: 100,
       met: ratio != null && ratio >= gRatio,
       read: (
-        <>Your average win is <b>${Math.round(awin).toLocaleString()}</b>. Your average loss is{' '}
+        <>Votre gain moyen est de <b>${Math.round(awin).toLocaleString()}</b>. Votre perte moyenne est de{' '}
           <b>${Math.round(aloss).toLocaleString()}</b>.
-          {ratio != null && ratio < 1 ? ' You win often and small, lose rarely and big.' : ''}
+          {ratio != null && ratio < 1 ? ' Vous gagnez souvent et petit, vous perdez rarement et gros.' : ''}
         </>
       ),
     },
     {
-      label: 'Exit efficiency', value: eff == null ? '—' : `${eff.toFixed(0)}%`,
+      label: 'Efficacité de sortie', value: eff == null ? '—' : `${eff.toFixed(0)}%`,
       fill: cap((eff || 0) / gEff), goal: `${gEff}%`, goalPct: 100,
       met: eff != null && eff >= gEff, amber: eff != null && eff < gEff,
-      read: eff == null ? 'Not enough excursion data' : `You capture ${eff.toFixed(0)}% of the move you were right about`,
+      read: eff == null ? 'Pas assez de données d\'excursion' : `Vous capturez ${eff.toFixed(0)}% du mouvement sur lequel vous aviez raison`,
     },
     {
-      label: 'Expectancy', value: money2(k.expectancy || 0),
+      label: 'Espérance', value: money2(k.expectancy || 0),
       fill: cap((k.expectancy || 0) / gExp), goal: `$${gExp}`, goalPct: 100,
       met: (k.expectancy || 0) >= gExp,
-      read: 'What the next trade is worth, on average',
+      read: 'Ce que vaut le prochain trade, en moyenne',
     },
   ];
 
@@ -370,12 +370,12 @@ export default function DashboardRender(p) {
     ? {
       label: shortDate(scrub.date),
       value: scrub.net_pnl,
-      when: scrub.cumulative != null ? `balance ${money(scrub.cumulative)}` : '',
+      when: scrub.cumulative != null ? `solde ${money(scrub.cumulative)}` : '',
     }
     : (() => {
       if (!days.length) return null;
       const last = days[days.length - 1];
-      return { label: 'Last session', value: last.net_pnl, when: shortDate(last.date) };
+      return { label: 'Dernière séance', value: last.net_pnl, when: shortDate(last.date) };
     })();
 
   return (
@@ -389,9 +389,9 @@ export default function DashboardRender(p) {
               {dollars}<span className="cents">{cents}</span>
             </h1>
             <p className="v3-money-sub">
-              <b>{(k.trading_days || 0).toLocaleString()} sessions</b>, {(k.total_trades || 0).toLocaleString()} trades.
-              {' '}You kept <b>${Math.round(net).toLocaleString()}</b> of{' '}
-              <b>${Math.round(k.total_gross_pnl || 0).toLocaleString()}</b> gross; commissions took{' '}
+              <b>{(k.trading_days || 0).toLocaleString()} séances</b>, {(k.total_trades || 0).toLocaleString()} trades.
+              {' '}Vous avez gardé <b>${Math.round(net).toLocaleString()}</b> sur{' '}
+              <b>${Math.round(k.total_gross_pnl || 0).toLocaleString()}</b> brut ; les commissions ont pris{' '}
               <b>${Math.round(Math.abs(k.total_commissions || 0)).toLocaleString()}</b>.
             </p>
           </div>
@@ -404,7 +404,7 @@ export default function DashboardRender(p) {
                 aria-pressed={showGoals}
                 aria-expanded={showGoals}
               >
-                Edit goals
+                Modifier les objectifs
               </button>
               {RangePicker}
             </div>
@@ -422,8 +422,8 @@ export default function DashboardRender(p) {
 
         <div className="v3-strip-wrap">
           <div className="v3-strip-head">
-            <span className="v3-lab">Every session in this range</span>
-            <span className="v3-lab v3-hide-s">Hover to scrub &middot; click to open the day</span>
+            <span className="v3-lab">Toutes les séances de cette période</span>
+            <span className="v3-lab v3-hide-s">Survolez pour explorer &middot; cliquez pour ouvrir le jour</span>
           </div>
           <SessionStrip days={days} onPick={onDayClick} onHover={setScrub} />
         </div>
@@ -448,20 +448,20 @@ export default function DashboardRender(p) {
             <div>
               <div className="v3-sec-head">
                 <div>
-                  <h2 className="v3-h">Recent trades</h2>
-                  <p className="v3-h-sub">The last ten closed</p>
+                  <h2 className="v3-h">Trades récents</h2>
+                  <p className="v3-h-sub">Les dix derniers clôturés</p>
                 </div>
-                <button type="button" className="btn btn-secondary btn-sm" onClick={onViewAllTrades}>View all</button>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={onViewAllTrades}>Tout voir</button>
               </div>
               {!recentTrades?.length ? (
-                <div className="v3-empty">No trades in this range.</div>
+                <div className="v3-empty">Aucun trade sur cette période.</div>
               ) : (
                 <div className="v3-scroll">
                   <table className="v3-t">
                     <thead>
                       <tr>
-                        <th>Ticker</th>
-                        <th className="v3-hide-s">Side</th>
+                        <th>Symbole</th>
+                        <th className="v3-hide-s">Côté</th>
                         <th className="r">Date</th>
                         <th className="r">P&amp;L</th>
                       </tr>
@@ -476,7 +476,7 @@ export default function DashboardRender(p) {
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenDetail && onOpenDetail(t); }
                           }}
-                          aria-label={`Open ${t.ticker} trade`}
+                          aria-label={`Ouvrir le trade ${t.ticker}`}
                         >
                           <td className="v3-tick">{t.ticker}</td>
                           <td className="v3-hide-s v3-side">{(t.side || '').toLowerCase() === 'short' ? 'Short' : 'Long'}</td>

@@ -8,6 +8,9 @@ DAILY_SUMMARY_PROMPT = """You are a professional trading coach producing an end-
 
 You will receive structured data: the date, all trades with their analysis, the day's KPIs, and optionally a diary entry. Your job is to produce a thorough, honest coaching report in JSON format.
 
+Write every free-text value in French. Keep all JSON keys and the grade letters
+(trade_grades[].grade, overall_grade) exactly as specified below, in English/letter form.
+
 Rules:
 - Reference actual tickers, prices, and dollar amounts — never speak in generalities when you have specifics
 - trade_grades must contain exactly one entry per trade provided (use the trade_group key)

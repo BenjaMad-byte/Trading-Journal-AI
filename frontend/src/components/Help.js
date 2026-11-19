@@ -2,103 +2,103 @@ import { PageHeader } from './ui';
 
 const METRICS = [
   {
-    category: 'Dashboard KPIs',
+    category: 'KPIs du tableau de bord',
     items: [
       {
-        name: 'Net P&L',
-        formula: 'Sum of all closed trade P&L after commissions',
-        description: 'Your total realized profit or loss for the selected period.',
-        why: 'The bottom line. Every other metric is just an explanation for why this number is what it is.',
+        name: 'P&L net',
+        formula: 'Somme du P&L de tous les trades clôturés, après commissions',
+        description: 'Votre profit ou perte total réalisé pour la période sélectionnée.',
+        why: "Le chiffre qui compte vraiment. Toutes les autres métriques ne font qu'expliquer pourquoi ce chiffre est ce qu'il est.",
         target: null,
       },
       {
-        name: 'Total Trades',
-        formula: 'Count of completed round-trip positions',
-        description: 'Number of trades that opened and closed within the period.',
-        why: 'Provides denominator context. A 70% win rate on 10 trades is very different from 70% on 300 trades.',
+        name: 'Trades totaux',
+        formula: 'Nombre de positions aller-retour complètes',
+        description: 'Nombre de trades ouverts et clôturés pendant la période.',
+        why: "Donne le contexte du dénominateur. Un taux de réussite de 70% sur 10 trades est très différent de 70% sur 300 trades.",
         target: null,
       },
       {
-        name: 'Trade Win %',
-        formula: 'Winning trades / Total trades × 100',
-        description: 'Percentage of individual trades that closed with a positive net P&L.',
-        why: 'High win rate feels good but is meaningless without knowing your average win vs. loss size. A 40% win rate with a 3:1 reward:risk ratio beats a 70% win rate with 0.5:1.',
-        target: '55-65% for momentum setups; 40%+ acceptable if avg win/loss > 2',
+        name: 'Taux de réussite (trades)',
+        formula: 'Trades gagnants / Total des trades × 100',
+        description: 'Pourcentage de trades individuels clôturés avec un P&L net positif.',
+        why: "Un taux de réussite élevé fait du bien mais ne veut rien dire sans connaître la taille moyenne de vos gains vs vos pertes. Un taux de 40% avec un ratio risque:récompense de 3:1 bat un taux de 70% avec un ratio de 0,5:1.",
+        target: '55-65% pour les setups de momentum ; 40%+ acceptable si gain/perte moyen > 2',
       },
       {
-        name: 'Profit Factor',
-        formula: 'Gross winning P&L / Gross losing P&L',
-        description: 'Ratio of total money made on winners to total money lost on losers.',
-        why: 'A profit factor above 1.0 means you make more than you lose. Below 1.0 is a losing system regardless of win rate. Values above 1.5 indicate a solid edge; above 2.0 is exceptional.',
-        target: '1.5 or above',
+        name: 'Facteur de profit',
+        formula: 'P&L brut des gains / P&L brut des pertes',
+        description: "Ratio entre l'argent total gagné sur les gains et l'argent total perdu sur les pertes.",
+        why: "Un facteur de profit supérieur à 1,0 signifie que vous gagnez plus que vous ne perdez. En dessous de 1,0, c'est un système perdant quel que soit le taux de réussite. Des valeurs au-dessus de 1,5 indiquent un edge solide ; au-dessus de 2,0 c'est exceptionnel.",
+        target: '1,5 ou plus',
       },
       {
-        name: 'Day Win %',
-        formula: 'Positive P&L days / Total trading days × 100',
-        description: 'Percentage of trading sessions where you ended the day profitable.',
-        why: 'Measures consistency at the session level, not just the trade level. A trader with 80% day win rate but a few large blowup days is a different risk profile than steady 60%.',
+        name: 'Taux de réussite (jours)',
+        formula: 'Jours à P&L positif / Total des jours de trading × 100',
+        description: 'Pourcentage de séances de trading terminées profitables.',
+        why: "Mesure la régularité au niveau de la séance, pas seulement du trade. Un trader avec 80% de jours gagnants mais quelques grosses journées catastrophiques a un profil de risque différent d'un 60% régulier.",
         target: '70-80%',
       },
       {
-        name: 'Avg Win / Loss',
-        formula: 'Average winning trade $ / Average losing trade $',
-        description: 'How much you make on a typical winner relative to how much you lose on a typical loser.',
-        why: 'Combined with win rate, this determines expectancy. If your ratio is below 1.0, you need a very high win rate just to break even. Most prop traders target 1.5-2.5.',
-        target: '1.5 or above',
+        name: 'Gain moyen / Perte moyenne',
+        formula: 'Gain moyen en $ / Perte moyenne en $',
+        description: 'Combien vous gagnez sur un gain typique par rapport à ce que vous perdez sur une perte typique.',
+        why: "Combiné au taux de réussite, cela détermine l'espérance. Si votre ratio est inférieur à 1,0, il vous faut un taux de réussite très élevé juste pour être à l'équilibre. La plupart des traders professionnels visent 1,5-2,5.",
+        target: '1,5 ou plus',
       },
       {
-        name: 'Expectancy',
-        formula: '(Win% × Avg Win) + (Loss% × Avg Loss)',
-        description: 'Expected dollar value earned per trade, on average, over many trades.',
-        why: 'The single most important metric for knowing if you have a real edge. Positive expectancy means the system makes money over time. Negative means it loses no matter how good your individual setups feel. $39/trade across 1,000 trades = $39,000.',
-        target: 'Positive; $25+ per trade is strong for intraday',
+        name: 'Espérance',
+        formula: '(Taux de réussite × Gain moyen) + (Taux de perte × Perte moyenne)',
+        description: 'Valeur en dollars attendue par trade, en moyenne, sur un grand nombre de trades.',
+        why: "La métrique la plus importante pour savoir si vous avez un vrai edge. Une espérance positive signifie que le système gagne de l'argent dans le temps. Négative, il perd quelle que soit la qualité ressentie de vos setups. 39$/trade sur 1000 trades = 39 000$.",
+        target: 'Positive ; 25$+ par trade est solide en intraday',
       },
     ],
   },
   {
-    category: 'Reports & Edge Analytics',
+    category: "Rapports et analyse de l'edge",
     items: [
       {
-        name: 'Time-of-Day P&L',
-        formula: 'Net P&L summed per 30-minute bucket (9:30 - 4:00)',
-        description: 'Aggregate profit and loss broken down by the 30-minute window when the trade was entered.',
-        why: 'Most intraday traders discover they lose money after a specific time. If your 1:00-2:30 PM bar is reliably red, that is a simple rule: stop trading after lunch. High-probability windows usually cluster in the first 90 minutes.',
-        target: 'Identify your highest and lowest P&L windows, then focus or avoid accordingly',
+        name: 'P&L par heure de la journée',
+        formula: 'P&L net additionné par tranche de 30 minutes (9h30 - 16h00)',
+        description: "Profit et perte agrégés par tranche de 30 minutes correspondant à l'heure d'entrée du trade.",
+        why: "La plupart des traders intraday découvrent qu'ils perdent de l'argent après une certaine heure. Si votre tranche 13h00-14h30 est systématiquement rouge, c'est une règle simple : arrêtez de trader après le déjeuner. Les fenêtres à forte probabilité se regroupent souvent dans les 90 premières minutes.",
+        target: 'Identifiez vos meilleures et pires fenêtres de P&L, puis concentrez-vous ou évitez-les en conséquence',
       },
       {
-        name: 'Day-of-Week P&L',
-        formula: 'Net P&L summed per calendar day (Mon-Fri)',
-        description: 'Aggregate profit and loss by day of the week across all traded sessions.',
-        why: 'Many traders have consistent biases - bad Mondays (low conviction on thin pre-market), bad Fridays (profit-taking pressure), strong Thursdays. If the pattern persists over 100+ days, it is structural and tradeable.',
-        target: 'Any day that is reliably negative over 30+ samples is worth sizing down or skipping',
+        name: 'P&L par jour de la semaine',
+        formula: 'P&L net additionné par jour calendaire (lun-ven)',
+        description: 'Profit et perte agrégés par jour de la semaine sur toutes les séances tradées.',
+        why: "Beaucoup de traders ont des biais constants - mauvais lundis (faible conviction sur un pré-marché peu liquide), mauvais vendredis (pression de prise de profit), jeudis solides. Si le schéma persiste sur 100+ jours, c'est structurel et exploitable.",
+        target: "Tout jour systématiquement négatif sur 30+ échantillons mérite une taille réduite ou d'être évité",
       },
       {
-        name: 'R-Multiple Distribution',
-        formula: 'Actual P&L / Planned risk per trade, binned into 0.5R steps',
-        description: 'A histogram of trade outcomes expressed as multiples of your planned risk. A 2R trade returned twice your stop loss distance; a -1R trade hit your stop.',
-        why: 'This tells you whether your execution matches your plan. If you plan 2R targets but most trades are 0.3R scratches, you are cutting winners early. If there is a fat tail on the left side, you are not respecting stops. Requires R-multiple to be logged per trade.',
-        target: 'Mode should be positive; distribution should be right-skewed (more positive outcomes than negative)',
+        name: 'Distribution du Multiple R',
+        formula: 'P&L réel / Risque prévu par trade, regroupé en tranches de 0,5R',
+        description: "Un histogramme des résultats de trade exprimés en multiples de votre risque prévu. Un trade à 2R a rapporté deux fois la distance de votre stop loss ; un trade à -1R a touché votre stop.",
+        why: "Cela vous indique si votre exécution correspond à votre plan. Si vous visez des objectifs à 2R mais que la plupart des trades sont des scratchs à 0,3R, vous coupez vos gains trop tôt. S'il y a une queue épaisse du côté gauche, vous ne respectez pas vos stops. Nécessite que le multiple R soit enregistré par trade.",
+        target: 'Le mode doit être positif ; la distribution doit être asymétrique à droite (plus de résultats positifs que négatifs)',
       },
       {
-        name: 'Emotion vs. Outcome',
-        formula: 'Win rate and avg P&L grouped by logged emotional state',
-        description: 'A breakdown of performance by the emotional state you logged: calm, anxious, overconfident, disciplined, frustrated, revenge.',
-        why: '"Revenge" and "frustrated" rows almost always show the worst numbers. Seeing the actual dollar cost of trading angry is more powerful than any rule about not revenge trading. Requires emotional state to be logged per trade.',
-        target: '"Calm" and "disciplined" rows should outperform your overall average; "revenge" should be a red flag',
+        name: 'État émotionnel vs résultat',
+        formula: "Taux de réussite et P&L moyen regroupés par état émotionnel enregistré",
+        description: "Une ventilation de la performance par état émotionnel enregistré : calme, anxieux, trop confiant, discipliné, frustré, revanche.",
+        why: "Les lignes « revanche » et « frustré » montrent presque toujours les pires chiffres. Voir le coût réel en dollars de trader en colère est plus puissant que n'importe quelle règle sur le revenge trading. Nécessite que l'état émotionnel soit enregistré par trade.",
+        target: 'Les lignes « calme » et « discipliné » devraient surpasser votre moyenne globale ; « revanche » devrait être un signal d\'alarme',
       },
       {
-        name: 'Hold Time (Winners vs. Losers)',
-        formula: 'Avg minutes from first fill to last fill, split by outcome',
-        description: 'Average time you hold winning trades vs. losing trades. Computed from execution timestamps.',
-        why: 'The #1 behavioral bias of retail traders is holding losers too long and cutting winners too early. If your losers are held 2x longer than winners, you are hoping for recovery instead of respecting your plan.',
-        target: 'Winners held longer than losers is a sign of good discipline',
+        name: 'Durée de détention (gains vs pertes)',
+        formula: 'Minutes moyennes entre le premier et le dernier fill, séparées par résultat',
+        description: 'Temps moyen de détention des trades gagnants vs perdants. Calculé à partir des horodatages d\'exécution.',
+        why: "Le biais comportemental n°1 des traders particuliers est de garder les perdants trop longtemps et de couper les gagnants trop tôt. Si vos pertes sont détenues deux fois plus longtemps que vos gains, vous espérez une reprise au lieu de respecter votre plan.",
+        target: 'Des gains détenus plus longtemps que les pertes est un signe de bonne discipline',
       },
       {
-        name: 'Mistake Frequency',
-        formula: 'Count of each mistake tag from trade analysis and diary entries',
-        description: 'A ranked list of the mistakes you make most often, sourced from your trade journal notes and AI tagging.',
-        why: 'Repetition is the signal. You already know your rules. This chart shows which ones you break most. Fix one mistake at a time - the highest bar first.',
-        target: 'Bars should shrink over time as you address each mistake systematically',
+        name: 'Fréquence des erreurs',
+        formula: "Nombre d'occurrences de chaque tag d'erreur issu de l'analyse des trades et du journal",
+        description: "Un classement des erreurs que vous faites le plus souvent, tirées des notes de votre journal de trading et du tagging par IA.",
+        why: "La répétition est le signal. Vous connaissez déjà vos règles. Ce graphique montre lesquelles vous enfreignez le plus. Corrigez une erreur à la fois - la barre la plus haute en premier.",
+        target: 'Les barres devraient se réduire avec le temps à mesure que vous corrigez chaque erreur systématiquement',
       },
     ],
   },
@@ -106,128 +106,128 @@ const METRICS = [
 
 const FEATURES = [
   {
-    name: 'Dashboard',
+    name: 'Tableau de bord',
     icon: '🗂',
-    description: 'Real-time overview of all KPIs, cumulative and daily P&L charts, a calendar heatmap, open positions, recent trades, and Time-of-Day and Day-of-Week charts.',
+    description: "Vue d'ensemble en temps réel de tous les KPIs, des graphiques de P&L cumulé et quotidien, d'une heatmap calendaire, des positions ouvertes, des trades récents, et des graphiques par heure de la journée et par jour de la semaine.",
     tips: [
-      'Use the date range picker to compare any period (e.g., this month vs. last month).',
-      'Click any calendar day to jump directly to Day Review for that session.',
-      'Use Edit goals in the Dashboard header to change your performance targets.',
+      'Utilisez le sélecteur de période pour comparer deux périodes (par ex. ce mois-ci vs le mois dernier).',
+      'Cliquez sur un jour du calendrier pour aller directement au Bilan du jour de cette séance.',
+      'Utilisez « Modifier les objectifs » dans l\'en-tête du tableau de bord pour changer vos cibles de performance.',
     ],
   },
   {
-    name: 'Goals',
+    name: 'Objectifs',
     icon: '🎯',
-    description: 'Editable performance targets for each KPI card. A progress bar appears below each metric showing how close you are to your goal, turning green when met.',
+    description: "Cibles de performance modifiables pour chaque carte de KPI. Une barre de progression apparaît sous chaque métrique montrant à quel point vous êtes proche de votre objectif, et devient verte une fois atteint.",
     tips: [
-      'Open the Goals panel with Edit goals in the Dashboard header.',
-      'Goals are saved per account - you can set different targets for your day trading vs. swing account.',
-      'Default targets: Win Rate 65%, Profit Factor 1.5, Day Win Rate 75%, Expectancy $50, Avg Win/Loss 1.5.',
+      'Ouvrez le panneau Objectifs avec « Modifier les objectifs » dans l\'en-tête du tableau de bord.',
+      'Les objectifs sont enregistrés par compte - vous pouvez définir des cibles différentes pour votre compte day trading et votre compte swing.',
+      'Cibles par défaut : Taux de réussite 65%, Facteur de profit 1,5, Taux de réussite journalier 75%, Espérance 50$, Gain/Perte moyen 1,5.',
     ],
   },
   {
-    name: 'Trade View',
+    name: 'Trades',
     icon: '📋',
-    description: 'Full trade log with filtering by date range, ticker, side, and strategy. Click any row to open execution detail and AI-generated coaching.',
+    description: "Journal complet des trades avec filtrage par période, symbole, sens et stratégie. Cliquez sur une ligne pour ouvrir le détail des exécutions et le coaching généré par IA.",
     tips: [
-      'Use the date filter to isolate a specific setup or time period.',
-      'The AI coaching tab inside each trade pulls context from your diary and provides specific feedback.',
-      'Trade charts open on the trade day 9:30-16:00 for 1m to 15m, the last month for 30m and 1H, and the last year for Daily and Weekly.',
-      'Click Buy fill, Sell fill, VWAP, SL or Target above the chart to hide or show it.',
+      'Utilisez le filtre de dates pour isoler un setup ou une période précise.',
+      "L'onglet de coaching IA dans chaque trade utilise le contexte de votre journal et fournit un retour spécifique.",
+      'Les graphiques de trade s\'ouvrent sur le jour du trade 9h30-16h00 pour les intervalles 1m à 15m, le dernier mois pour 30m et 1H, et la dernière année pour journalier et hebdomadaire.',
+      'Cliquez sur Achat, Vente, VWAP, SL ou Objectif au-dessus du graphique pour le masquer ou l\'afficher.',
     ],
   },
   {
-    name: 'Calendar',
+    name: 'Calendrier',
     icon: '📅',
-    description: 'Monthly heatmap with color-coded P&L per day. Week and month totals shown in the margins.',
+    description: 'Heatmap mensuelle avec P&L codé par couleur pour chaque jour. Totaux hebdomadaires et mensuels affichés dans les marges.',
     tips: [
-      'Green days are profitable, red days are losses. Shade intensity reflects magnitude.',
-      'Click any day to navigate directly to the Day Review for that session.',
+      "Les jours verts sont profitables, les jours rouges sont des pertes. L'intensité de la teinte reflète l'ampleur.",
+      'Cliquez sur un jour pour naviguer directement vers le Bilan du jour de cette séance.',
     ],
   },
   {
-    name: 'Day Review',
+    name: 'Bilan du jour',
     icon: '📆',
-    description: 'Deep dive into a single trading session. Shows all trades, individual P&L, AI daily coaching report, and the Weekly Summary generator.',
+    description: 'Analyse approfondie d\'une séance de trading. Montre tous les trades, le P&L individuel, le rapport de coaching IA quotidien, et le générateur de Résumé hebdomadaire.',
     tips: [
-      'The AI coaching report grades your session based on execution quality, not just P&L.',
-      'Use the Weekly Summary button to generate a cross-week behavioral synthesis (cached after first generation).',
-      'The Circuit Breaker banner fires automatically after 3 consecutive losing trades in the session.',
+      "Le rapport de coaching IA note votre séance selon la qualité d'exécution, pas seulement le P&L.",
+      'Utilisez le bouton Résumé hebdomadaire pour générer une synthèse comportementale inter-semaines (mise en cache après la première génération).',
+      "La bannière Coupe-circuit apparaît automatiquement après 3 trades perdants consécutifs dans la séance.",
     ],
   },
   {
     name: 'Edge',
     icon: '🎯',
-    description: 'Four behavioral analytics charts: R-Multiple Distribution, Emotion vs. Outcome, Mistake Frequency, and Hold Time. These reveal patterns invisible in raw P&L.',
+    description: 'Quatre graphiques analytiques comportementaux : Distribution du Multiple R, État émotionnel vs résultat, Fréquence des erreurs, et Durée de détention. Ces graphiques révèlent des schémas invisibles dans le P&L brut.',
     tips: [
-      'R-Multiple and Emotion data require filling in the analysis fields on each trade.',
-      'Mistake frequency comes from both diary AI tagging and manual trade notes.',
-      'Hold Time is computed automatically from execution timestamps - no manual logging needed.',
+      'Les données de Multiple R et d\'État émotionnel nécessitent de remplir les champs d\'analyse de chaque trade.',
+      'La fréquence des erreurs provient à la fois du tagging IA du journal et des notes manuelles sur les trades.',
+      'La Durée de détention est calculée automatiquement à partir des horodatages d\'exécution - aucune saisie manuelle nécessaire.',
     ],
   },
   {
-    name: 'Import',
+    name: 'Importer',
     icon: '📤',
-    description: 'CSV importer for Thinkorswim account statements and Interactive Brokers (IBKR) Activity Statements. Pick the broker from the dropdown (or leave Auto-detect). Automatically parses executions, groups them into trades, and detects duplicates on re-import. See the README for a Claude Code prompt that adds any other broker.',
+    description: "Importateur CSV pour les relevés de compte Thinkorswim et les relevés d'activité Interactive Brokers (IBKR). Choisissez le courtier dans la liste déroulante (ou laissez Détection automatique). Analyse automatiquement les exécutions, les regroupe en trades, et détecte les doublons en cas de réimport. Voir le README pour un prompt Claude Code qui ajoute n'importe quel autre courtier.",
     tips: [
-      'Re-importing a file is safe - duplicates are detected by trade group and skipped.',
-      'If you deleted a bad trade and need to re-import it, the re-import will restore it cleanly.',
+      "Réimporter un fichier est sûr - les doublons sont détectés par groupe de trades et ignorés.",
+      "Si vous avez supprimé un trade erroné et devez le réimporter, le réimport le restaurera proprement.",
     ],
   },
   {
-    name: 'Strategies',
+    name: 'Stratégies',
     icon: '📊',
-    description: 'P&L, win rate, and trade count broken down by strategy name. Strategy names come from your diary AI analysis.',
+    description: 'P&L, taux de réussite et nombre de trades ventilés par nom de stratégie. Les noms de stratégie viennent de l\'analyse IA de votre journal.',
     tips: [
-      'Upload diary entries to start populating strategy data.',
-      'Strategies with negative P&L across 10+ trades are signals to reduce size or stop trading that setup.',
+      'Importez des entrées de journal pour commencer à alimenter les données de stratégie.',
+      'Les stratégies avec un P&L négatif sur 10+ trades sont des signaux pour réduire la taille ou arrêter ce setup.',
     ],
   },
   {
-    name: 'Diary',
+    name: 'Journal',
     icon: '📓',
-    description: 'AI-powered trade diary. Upload handwritten notes, screenshots, or typed text. Claude extracts setup, entry/exit reason, emotional state, mistakes, and R-multiple.',
+    description: "Journal de trading alimenté par IA. Importez des notes manuscrites, des captures d'écran, ou du texte saisi. Claude extrait le setup, la raison d'entrée/sortie, l'état émotionnel, les erreurs, et le multiple R.",
     tips: [
-      'The more detail you write in your pre/post-market notes, the better the AI extraction.',
-      'Diary entries are matched to trades automatically by ticker and date.',
+      "Plus vous détaillez vos notes avant/après marché, meilleure sera l'extraction par l'IA.",
+      'Les entrées de journal sont rapprochées des trades automatiquement par symbole et par date.',
     ],
   },
   {
-    name: 'Settings',
+    name: 'Réglages',
     icon: '⚙️',
-    description: 'Manage the names the journal uses: strategies with descriptions, sources, and tags by type. Add, rename, merge duplicates or delete. Reports has a matching Sources & Tags tab.',
+    description: "Gérez les noms utilisés par le journal : stratégies avec descriptions, sources, et tags par type. Ajoutez, renommez, fusionnez les doublons ou supprimez. Rapports a un onglet Sources et Tags équivalent.",
     tips: [
-      'Merging A into B moves every trade from A to B. If a later diary analysis says A, it is saved as B.',
-      'Deleting a name that trades use asks whether to reassign them to another name or leave them blank.',
+      'Fusionner A dans B déplace tous les trades de A vers B. Si une analyse de journal ultérieure mentionne A, elle est enregistrée comme B.',
+      'Supprimer un nom utilisé par des trades demande si vous voulez les réaffecter à un autre nom ou les laisser vides.',
     ],
   },
   {
     name: 'Brain',
     icon: '🧠',
-    description: 'AI chatbot with full context of your trade history. Ask any question about your performance and patterns.',
+    description: 'Chatbot IA avec le contexte complet de votre historique de trading. Posez n\'importe quelle question sur votre performance et vos schémas.',
     tips: [
-      'Ask: "What is my best performing setup?" or "When do I tend to revenge trade?"',
-      'Brain has access to all your trades, P&L, and analysis - it answers from your actual data, not generic advice.',
-      'Open Brain from the Brain button in the header or the floating Brain button at the bottom right.',
+      'Demandez : « Quel est mon setup le plus performant ? » ou « Quand ai-je tendance à faire du revenge trading ? »',
+      "Brain a accès à tous vos trades, votre P&L et vos analyses - il répond à partir de vos données réelles, pas de conseils génériques.",
+      'Ouvrez Brain depuis le bouton Brain dans l\'en-tête ou le bouton flottant Brain en bas à droite.',
     ],
   },
   {
-    name: 'Weekly Summary',
+    name: 'Résumé hebdomadaire',
     icon: '📝',
-    description: 'AI-generated behavioral synthesis for the week. Available as a collapsible card in Day Review. Identifies the week\'s anchor mistake, standout edge, and one rule to carry forward.',
+    description: "Synthèse comportementale générée par IA pour la semaine. Disponible comme carte dépliable dans le Bilan du jour. Identifie l'erreur dominante de la semaine, le point fort marquant, et une règle à retenir.",
     tips: [
-      'Generated on demand, cached after the first generation.',
-      'Best run at the end of the trading week (Friday) to capture the full picture.',
-      'Use "Force regenerate" to get a fresh analysis if you logged more trades or diary entries.',
+      'Généré à la demande, mis en cache après la première génération.',
+      'Idéalement lancé à la fin de la semaine de trading (vendredi) pour capturer la vue d\'ensemble.',
+      'Utilisez « Forcer la régénération » pour obtenir une analyse fraîche si vous avez enregistré plus de trades ou d\'entrées de journal.',
     ],
   },
   {
-    name: 'Circuit Breaker',
+    name: 'Coupe-circuit',
     icon: '🔶',
-    description: 'An orange banner that appears automatically in Day Review when you have 3 or more consecutive losing trades in the current session.',
+    description: 'Une bannière orange qui apparaît automatiquement dans le Bilan du jour quand vous avez 3 trades perdants consécutifs ou plus dans la séance en cours.',
     tips: [
-      'This is not a hard stop - it is a pause prompt. The research on this is clear: a brief pause after 3 losses significantly reduces revenge trading.',
-      'Dismiss it once you have consciously reviewed and decided to continue.',
+      "Ce n'est pas un arrêt forcé - c'est une invitation à la pause. La recherche est claire sur ce point : une courte pause après 3 pertes réduit significativement le revenge trading.",
+      "Fermez-la une fois que vous avez consciemment réévalué la situation et décidé de continuer.",
     ],
   },
 ];
@@ -239,11 +239,11 @@ function MetricCard({ item }) {
       <div className="help-formula">{item.formula}</div>
       <div style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 10, lineHeight: 1.55 }}>{item.description}</div>
       <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: item.target ? 10 : 0 }}>
-        <span style={{ color: 'var(--accent-line)', fontWeight: 600 }}>Why it matters: </span>{item.why}
+        <span style={{ color: 'var(--accent-line)', fontWeight: 600 }}>Pourquoi c'est important : </span>{item.why}
       </div>
       {item.target && (
         <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Target: </span>{item.target}
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Cible : </span>{item.target}
         </div>
       )}
     </div>
@@ -271,8 +271,8 @@ export default function Help() {
   return (
     <div>
       <PageHeader
-        title="Help and Reference"
-        subtitle="What each metric means and where every feature lives."
+        title="Aide et référence"
+        subtitle="Ce que signifie chaque métrique et où se trouve chaque fonctionnalité."
       />
 
       {METRICS.map(section => (
@@ -285,7 +285,7 @@ export default function Help() {
       ))}
 
       <div style={{ marginBottom: 'var(--space-6)' }}>
-        <h2 className="section-title" style={{ marginBottom: 12 }}>Features</h2>
+        <h2 className="section-title" style={{ marginBottom: 12 }}>Fonctionnalités</h2>
         <div className="help-grid">
           {FEATURES.map(f => <FeatureCard key={f.name} feature={f} />)}
         </div>

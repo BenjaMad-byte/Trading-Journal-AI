@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, Calendar, X } from 'lucide-react';
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 
 function toStr(d) {
   if (!d) return '';
@@ -31,13 +31,13 @@ function getPresets() {
   const qEnd = new Date(t.getFullYear(), qm + 3, 0);
   const ytd = new Date(t.getFullYear(), 0, 1);
   return [
-    { label: 'Today',              from: t,      to: t      },
-    { label: 'This week',          from: monday, to: sunday },
-    { label: 'This month',         from: mStart, to: mEnd   },
-    { label: 'Last 30 days',       from: l30,    to: t      },
-    { label: 'Last month',         from: lmStart,to: lmEnd  },
-    { label: 'This quarter',       from: qStart, to: qEnd   },
-    { label: 'YTD (year to date)', from: ytd,    to: t      },
+    { label: 'Aujourd\'hui',              from: t,      to: t      },
+    { label: 'Cette semaine',             from: monday, to: sunday },
+    { label: 'Ce mois',                   from: mStart, to: mEnd   },
+    { label: '30 derniers jours',         from: l30,    to: t      },
+    { label: 'Mois dernier',              from: lmStart,to: lmEnd  },
+    { label: 'Ce trimestre',              from: qStart, to: qEnd   },
+    { label: 'Depuis le début de l\'année', from: ytd,    to: t      },
   ];
 }
 
@@ -75,7 +75,7 @@ function CalendarMonth({ year, month, fromStr, toStr: toS, hoverStr, selecting, 
         {MONTHS[month]} {year}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px 0' }}>
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+        {['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'].map(d => (
           <div key={d} style={{ textAlign: 'center', fontSize: 11.5, color: 'var(--text-secondary)', padding: '4px 0' }}>{d}</div>
         ))}
         {weeks.map((week, wi) => week.map((d, di) => {
@@ -193,7 +193,7 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
     ? `${fmtLabel(selecting)} → ...`
     : hasRange
     ? `${fmtLabel(dateFrom)}  →  ${fmtLabel(dateTo)}`
-    : 'All time';
+    : 'Depuis le début';
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -212,7 +212,7 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
           <ChevronDown size={14} aria-hidden="true" />
         </button>
         {hasRange && (
-          <button type="button" className="btn btn-ghost btn-icon" onClick={clearRange} aria-label="Clear date range" title="Clear date range">
+          <button type="button" className="btn btn-ghost btn-icon" onClick={clearRange} aria-label="Effacer la plage de dates" title="Effacer la plage de dates">
             <X size={14} />
           </button>
         )}
@@ -220,7 +220,7 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
 
       {/* Dropdown panel */}
       {open && (
-        <div role="dialog" aria-label="Choose a date range" style={{
+        <div role="dialog" aria-label="Choisir une plage de dates" style={{
           position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 500,
           background: 'var(--surface-panel)', border: '1px solid var(--divider)',
           borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-dropdown)',
@@ -237,7 +237,7 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
                 color: dateFrom ? 'var(--text-primary)' : 'var(--text-secondary)',
                 borderColor: selecting ? 'var(--accent-line)' : 'var(--divider)',
               }}>
-                {selecting ? fmtLabel(selecting) : (dateFrom ? fmtLabel(dateFrom) : 'Start date')}
+                {selecting ? fmtLabel(selecting) : (dateFrom ? fmtLabel(dateFrom) : 'Date de début')}
               </div>
               <span style={{ color: 'var(--text-muted)' }}>→</span>
               <div style={{
@@ -245,13 +245,13 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
                 background: 'var(--surface-inset)', border: '1px solid var(--divider)',
                 color: dateTo && !selecting ? 'var(--text-primary)' : 'var(--text-secondary)',
               }}>
-                {selecting && hover ? fmtLabel(hover) : (dateTo && !selecting ? fmtLabel(dateTo) : 'End date')}
+                {selecting && hover ? fmtLabel(hover) : (dateTo && !selecting ? fmtLabel(dateTo) : 'Date de fin')}
               </div>
             </div>
 
             {/* Month nav */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <button type="button" className="cal-nav" onClick={prevMonth} aria-label="Previous month">
+              <button type="button" className="cal-nav" onClick={prevMonth} aria-label="Mois précédent">
                 <ChevronLeft size={16} />
               </button>
               <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -268,7 +268,7 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
                   onDayClick={handleDayClick} onDayHover={setHover}
                 />
               </div>
-              <button type="button" className="cal-nav" onClick={nextMonth} aria-label="Next month">
+              <button type="button" className="cal-nav" onClick={nextMonth} aria-label="Mois suivant">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -282,7 +282,7 @@ export default function DateRangePicker({ dateFrom, dateTo, onChange }) {
             flex: '1 0 170px',
             display: 'flex', flexDirection: 'column',
           }}>
-            <div className="eyebrow" style={{ padding: '0 20px 8px' }}>Presets</div>
+            <div className="eyebrow" style={{ padding: '0 20px 8px' }}>Préréglages</div>
             {getPresets().map(p => {
               const active = dateFrom === toStr(p.from) && dateTo === toStr(p.to);
               return (

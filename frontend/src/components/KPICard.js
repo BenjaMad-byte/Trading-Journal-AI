@@ -9,9 +9,9 @@ export function GoalBar({ value, goal, label }) {
         fontSize: 11, marginBottom: 3,
       }}>
         <span style={{ color: hit ? 'var(--green)' : 'var(--text-muted)', fontWeight: hit ? 600 : 400 }}>
-          {hit ? '✓ Goal met' : `${Math.round(pct)}% of goal`}
+          {hit ? '✓ Objectif atteint' : `${Math.round(pct)}% de l'objectif`}
         </span>
-        <span style={{ color: 'var(--text-muted)' }}>Goal: {label}</span>
+        <span style={{ color: 'var(--text-muted)' }}>Objectif : {label}</span>
       </div>
       <div style={{ height: 3, borderRadius: 2, background: 'var(--border)', overflow: 'hidden' }}>
         <div style={{
@@ -53,7 +53,7 @@ export default function KPICard({ title, value, subtitle, color, format = 'text'
       } else {
         label = `${up ? '↑ +' : '↓ '}${Math.abs(delta).toFixed(0)}`;
       }
-      comp = <div style={{ fontSize: 13, color: compColor, fontWeight: 600, marginTop: 6 }}>{label} vs prev</div>;
+      comp = <div style={{ fontSize: 13, color: compColor, fontWeight: 600, marginTop: 6 }}>{label} vs préc.</div>;
     }
   }
 

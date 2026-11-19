@@ -7,8 +7,8 @@
 // plain, and future days are dimmed. Clicking a traded day calls onDayClick,
 // which opens Day Review, exactly as before.
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+const MONTHS_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 const fmtK = (v) => {
   const n = Number(v || 0);
@@ -83,7 +83,7 @@ export default function CalendarGrid({ weeks, dayData, year, month, onDayClick, 
                 const bar = tone === 'pos' ? 'var(--result-pos)' : tone === 'neg' ? 'var(--result-neg)' : null;
                 const open = () => data && onDayClick && onDayClick(key);
                 const label = data
-                  ? `${MONTHS_SHORT[month - 1]} ${d}: ${signedK(pnl)}, ${data.trade_count} trade${data.trade_count !== 1 ? 's' : ''}, ${data.win_rate}% win${data.has_diary ? ', diary entry' : ''}. Open Day Review`
+                  ? `${MONTHS_SHORT[month - 1]} ${d} : ${signedK(pnl)}, ${data.trade_count} trade${data.trade_count !== 1 ? 's' : ''}, ${data.win_rate}% de réussite${data.has_diary ? ', entrée de journal' : ''}. Ouvrir le bilan du jour`
                   : undefined;
 
                 return (
@@ -116,12 +116,12 @@ export default function CalendarGrid({ weeks, dayData, year, month, onDayClick, 
                               display: 'grid', placeItems: 'center', minWidth: 22, height: 22, padding: '0 5px',
                               borderRadius: 11, background: 'var(--accent-line)',
                               color: 'var(--surface-page)', fontSize: S.num, fontWeight: 700,
-                            }} aria-label={`Today, ${d}`}>{d}</span>
+                            }} aria-label={`Aujourd'hui, ${d}`}>{d}</span>
                           ) : (
                             <span className="num" style={{ fontSize: S.num, color: data ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>{d}</span>
                           )}
                           {data?.has_diary && (
-                            <span title="Diary entry" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-line)' }} />
+                            <span title="Entrée de journal" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-line)' }} />
                           )}
                         </div>
 
@@ -135,7 +135,7 @@ export default function CalendarGrid({ weeks, dayData, year, month, onDayClick, 
                             <div style={{ fontSize: S.meta, color: 'var(--text-secondary)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               <span className="num">{data.trade_count}</span> trade{data.trade_count !== 1 ? 's' : ''}
                               {size === 'mini' ? ' · ' : <br />}
-                              <span className="num">{data.win_rate}%</span> win
+                              <span className="num">{data.win_rate}%</span> de réussite
                             </div>
                           </div>
                         )}
@@ -151,7 +151,7 @@ export default function CalendarGrid({ weeks, dayData, year, month, onDayClick, 
 
       {/* ── Week-summary cards (same width as one day column) ── */}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ height: S.headH, display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-secondary)', paddingLeft: 4 }}>Week</div>
+        <div style={{ height: S.headH, display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-secondary)', paddingLeft: 4 }}>Semaine</div>
         {weeks.map((week, wi) => {
           const { pnl, days } = weekStats(week);
           return (
@@ -163,16 +163,16 @@ export default function CalendarGrid({ weeks, dayData, year, month, onDayClick, 
               background: 'var(--surface-inset)',
               minWidth: 0,
             }}>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Week {wi + 1}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Semaine {wi + 1}</div>
               {days === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>No sessions</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Aucune séance</div>
               ) : (
                 <>
                   <div className={`num ${toneClass(pnl)}`} style={{ fontSize: S.wkPnl, fontWeight: 600, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>
                     {signedK(pnl)}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    <span className="num">{days}</span> day{days !== 1 ? 's' : ''}
+                    <span className="num">{days}</span> jour{days !== 1 ? 's' : ''}
                   </div>
                 </>
               )}

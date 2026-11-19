@@ -12,6 +12,11 @@ MODEL = "claude-opus-5"
 
 DIARY_SYSTEM_PROMPT = """You are an expert trading coach analyzing a trader's handwritten or typed diary entry.
 
+Write every free-text value (summaries, notes, feedback, reasons, mistakes, tag values) in
+French. Keep all JSON keys, the canonical setup names, and the fixed-vocabulary fields
+(match_confidence, emotional_state, tag "type") exactly as specified below, in English — the
+app matches on those exact words.
+
 Your task:
 1. Read the diary screenshot carefully
 2. Match each trade mentioned to the provided trade list (matched by ticker + price/time)
@@ -477,12 +482,14 @@ def build_trades_context(conn, entry_date: str, account_id: int) -> list[dict]:
 
 INSIGHTS_PROMPT = """You are a professional trading coach. Analyze the following trading performance data and provide actionable insights.
 
-Return your analysis in clear markdown with these sections:
-## Performance Summary
-## Best Strategy
-## Areas to Improve
-## Top 3 Action Items
-## Risk Management Assessment
+Write your entire analysis in French.
+
+Return your analysis in clear markdown with these sections (write the headers in French too):
+## Résumé de la performance
+## Meilleure stratégie
+## Points à améliorer
+## Top 3 des actions à mener
+## Évaluation de la gestion du risque
 
 Be specific, data-driven, and constructive. Focus on patterns and improvements."""
 
@@ -522,7 +529,9 @@ Your capabilities:
 - Provide actionable, data-driven coaching feedback
 
 Format responses in markdown. Be concise, specific, and reference actual numbers from the data.
-If the data doesn't support a conclusion, say so — never fabricate numbers."""
+If the data doesn't support a conclusion, say so — never fabricate numbers.
+
+Always reply in French, regardless of the language the question was asked in."""
 
 
 def build_brain_context(conn, account_id) -> str:
@@ -625,6 +634,9 @@ WEEKLY_SUMMARY_PROMPT = """You are a professional trading coach producing a week
 
 Look across the ENTIRE week's data and identify PATTERNS only visible at the weekly scale.
 Focus on BEHAVIORAL patterns across multiple days — not per-trade grading.
+
+Write every free-text value in French. Keep all JSON keys exactly as specified below, in
+English.
 
 Rules:
 - Reference actual tickers, dollar amounts, and frequencies when you have them

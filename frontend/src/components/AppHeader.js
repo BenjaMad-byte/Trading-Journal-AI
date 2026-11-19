@@ -9,14 +9,14 @@ import aiJournalLogo from '../assets/ai-journal-logo.png';
 // Every page stays one click away. Import, Brain and Add Trade live with the
 // account selector on the right, the rest are the labeled navigation.
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'trades', label: 'Trade View', icon: TrendingUp },
-  { id: 'calendar', label: 'Calendar', icon: CalendarDays },
-  { id: 'day-review', label: 'Day Review', icon: CalendarCheck },
-  { id: 'reports', label: 'Reports', icon: BarChart2 },
-  { id: 'diary', label: 'Diary', icon: BookOpen },
-  { id: 'help', label: 'Help', icon: HelpCircle },
-  { id: 'settings', label: 'Settings', icon: SettingsIcon },
+  { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+  { id: 'trades', label: 'Trades', icon: TrendingUp },
+  { id: 'calendar', label: 'Calendrier', icon: CalendarDays },
+  { id: 'day-review', label: 'Bilan du jour', icon: CalendarCheck },
+  { id: 'reports', label: 'Rapports', icon: BarChart2 },
+  { id: 'diary', label: 'Journal', icon: BookOpen },
+  { id: 'help', label: 'Aide', icon: HelpCircle },
+  { id: 'settings', label: 'Réglages', icon: SettingsIcon },
 ];
 
 const NEW_ACCOUNT_DEFAULT = { name: '', type: 'day_trading', color: '#6366f1', broker: 'Thinkorswim' };
@@ -32,7 +32,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
   const triggerRef = useRef(null);
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
-  const displayName = selectedAccount ? selectedAccount.name : 'All Accounts';
+  const displayName = selectedAccount ? selectedAccount.name : 'Tous les comptes';
 
   const close = (restoreFocus = true) => {
     setOpen(false);
@@ -69,7 +69,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
       await onAccountCreated();
       setEditingId(null);
     } catch (err) {
-      alert('Failed to rename: ' + (err.response?.data?.error || err.message));
+      alert('Échec du renommage : ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -84,7 +84,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
       setShowNewAccount(false);
       close();
     } catch (err) {
-      alert('Failed to create account: ' + (err.response?.data?.error || err.message));
+      alert('Échec de la création du compte : ' + (err.response?.data?.error || err.message));
     } finally {
       setCreating(false);
     }
@@ -98,7 +98,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
         className="acct-trigger"
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={`Account: ${displayName}`}
+        aria-label={`Compte : ${displayName}`}
         onClick={() => setOpen(v => !v)}
       >
         {selectedAccount && <span className="acct-dot" style={{ background: selectedAccount.color }} aria-hidden="true" />}
@@ -107,8 +107,8 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
       </button>
 
       {open && (
-        <div className="acct-menu" role="menu" aria-label="Accounts">
-          <div className="acct-menu-label">Show data for</div>
+        <div className="acct-menu" role="menu" aria-label="Comptes">
+          <div className="acct-menu-label">Afficher les données pour</div>
           <button
             type="button"
             role="menuitemradio"
@@ -118,7 +118,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
             autoFocus
           >
             <span style={{ width: 8 }} aria-hidden="true" />
-            All Accounts
+            Tous les comptes
           </button>
 
           {accounts.map(acct => (
@@ -127,7 +127,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
                 <div className="dropdown-item" style={{ cursor: 'default' }}>
                   <span className="acct-dot" style={{ background: acct.color }} aria-hidden="true" />
                   <input
-                    aria-label={`New name for ${acct.name}`}
+                    aria-label={`Nouveau nom pour ${acct.name}`}
                     value={editName}
                     onChange={e => setEditName(e.target.value)}
                     onKeyDown={e => {
@@ -138,10 +138,10 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
                     autoFocus
                     style={{ flex: 1, minWidth: 0, fontSize: 13, minHeight: 30, padding: '3px 8px' }}
                   />
-                  <button type="button" className="btn btn-ghost btn-icon" onClick={e => saveEdit(e, acct.id)} aria-label="Save account name">
+                  <button type="button" className="btn btn-ghost btn-icon" onClick={e => saveEdit(e, acct.id)} aria-label="Enregistrer le nom du compte">
                     <Check size={15} className="pos" />
                   </button>
-                  <button type="button" className="btn btn-ghost btn-icon" onClick={e => { e.stopPropagation(); setEditingId(null); }} aria-label="Cancel rename">
+                  <button type="button" className="btn btn-ghost btn-icon" onClick={e => { e.stopPropagation(); setEditingId(null); }} aria-label="Annuler le renommage">
                     <X size={15} />
                   </button>
                 </div>
@@ -161,8 +161,8 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
                     type="button"
                     className="btn btn-ghost btn-icon"
                     onClick={e => startEdit(e, acct)}
-                    aria-label={`Rename ${acct.name}`}
-                    title="Rename account"
+                    aria-label={`Renommer ${acct.name}`}
+                    title="Renommer le compte"
                   >
                     <Pencil size={13} />
                   </button>
@@ -178,31 +178,31 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
             aria-expanded={showNewAccount}
             onClick={() => setShowNewAccount(v => !v)}
           >
-            <Plus size={15} aria-hidden="true" /> New Account
+            <Plus size={15} aria-hidden="true" /> Nouveau compte
           </button>
 
           {showNewAccount && (
             <form onSubmit={handleCreateAccount} style={{ padding: '4px 12px 12px', display: 'grid', gap: 8 }}>
-              <label className="sr-only" htmlFor="new-acct-name">Account name</label>
+              <label className="sr-only" htmlFor="new-acct-name">Nom du compte</label>
               <input
                 id="new-acct-name"
-                placeholder="Account name"
+                placeholder="Nom du compte"
                 value={newAcct.name}
                 onChange={e => setNewAcct(p => ({ ...p, name: e.target.value }))}
                 required
               />
-              <label className="sr-only" htmlFor="new-acct-type">Account type</label>
+              <label className="sr-only" htmlFor="new-acct-type">Type de compte</label>
               <select
                 id="new-acct-type"
                 value={newAcct.type}
                 onChange={e => setNewAcct(p => ({ ...p, type: e.target.value }))}
               >
-                <option value="day_trading">Day Trading</option>
-                <option value="swing_trading">Swing Trading</option>
-                <option value="investment">Investment</option>
+                <option value="day_trading">Day trading</option>
+                <option value="swing_trading">Swing trading</option>
+                <option value="investment">Investissement</option>
               </select>
               <div style={{ display: 'flex', gap: 8 }}>
-                <label className="sr-only" htmlFor="new-acct-color">Account color</label>
+                <label className="sr-only" htmlFor="new-acct-color">Couleur du compte</label>
                 <input
                   id="new-acct-color"
                   type="color"
@@ -211,7 +211,7 @@ function AccountMenu({ accounts, selectedAccountId, onSelectAccount, onAccountCr
                   style={{ width: 44, minHeight: 36 }}
                 />
                 <button type="submit" className="btn btn-primary" disabled={creating} style={{ flex: 1 }}>
-                  {creating ? 'Creating...' : 'Create'}
+                  {creating ? 'Création...' : 'Créer'}
                 </button>
               </div>
             </form>
@@ -232,11 +232,11 @@ export default function AppHeader({
   return (
     <header className="app-header">
       <div className="app-header-inner">
-        <button type="button" className="app-brand" onClick={() => onNavigate('dashboard')} aria-label="AI Journal, go to Dashboard">
+        <button type="button" className="app-brand" onClick={() => onNavigate('dashboard')} aria-label="AI Journal, aller au tableau de bord">
           <img src={aiJournalLogo} alt="AI Journal" />
         </button>
 
-        <nav className="app-nav" aria-label="Main">
+        <nav className="app-nav" aria-label="Principale">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -257,7 +257,7 @@ export default function AppHeader({
             className={`btn btn-ghost${brainOpen ? ' active' : ''}`}
             onClick={onToggleBrain}
             aria-pressed={brainOpen}
-            title="Brain, your AI trading coach"
+            title="Brain, ton coach IA de trading"
           >
             <Brain size={16} aria-hidden="true" /> Brain
           </button>
@@ -273,10 +273,10 @@ export default function AppHeader({
             onClick={() => onNavigate('import')}
             aria-current={page === 'import' ? 'page' : undefined}
           >
-            <Upload size={16} aria-hidden="true" /> Import
+            <Upload size={16} aria-hidden="true" /> Importer
           </button>
           <button type="button" className="btn btn-primary" onClick={onAddTrade}>
-            <Plus size={16} aria-hidden="true" /> Add Trade
+            <Plus size={16} aria-hidden="true" /> Ajouter un trade
           </button>
         </div>
       </div>

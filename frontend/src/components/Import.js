@@ -6,10 +6,11 @@ import { PageHeader } from './ui';
 // Brokers the backend can parse (keys match csv_parser.BROKER_PARSERS).
 // 'auto' lets the server sniff the format from the file's first lines.
 const BROKERS = [
-  { value: 'auto', label: 'Auto-detect' },
+  { value: 'auto', label: 'Détection automatique' },
   { value: 'thinkorswim', label: 'Thinkorswim (Schwab)' },
   { value: 'ibkr', label: 'Interactive Brokers (IBKR)' },
-  { value: 'generic', label: 'Other broker (generic template)' },
+  { value: 'tradovate', label: 'Tradovate' },
+  { value: 'generic', label: 'Autre courtier (modèle générique)' },
 ];
 
 // Served from frontend/public/templates, so they download straight from the app.
@@ -17,17 +18,19 @@ const TEMPLATE_URL = '/templates/generic_trades_template.csv';
 const EXAMPLE_URL = '/templates/generic_trades_example.csv';
 
 const BROKER_HELP = {
-  auto: 'Pick a broker above, or leave Auto-detect and the importer will recognise a Thinkorswim account statement or an IBKR Activity Statement.',
-  thinkorswim: <>Export from Thinkorswim desktop: <em>Monitor → Account Statement → export icon → Export to File (CSV)</em></>,
-  ibkr: <>Export from IBKR Client Portal: <em>Performance &amp; Reports → Statements → Activity → pick the period → Download as CSV</em></>,
-  generic: <>Copy your fills into the template, one row per execution. Buys and sells of the same symbol are grouped into round-trip trades automatically, the same way as a broker import.</>,
+  auto: "Choisissez un courtier ci-dessus, ou laissez Détection automatique et l'importateur reconnaîtra un relevé de compte Thinkorswim ou un relevé d'activité IBKR.",
+  thinkorswim: <>Export depuis Thinkorswim desktop : <em>Monitor → Account Statement → export icon → Export to File (CSV)</em></>,
+  ibkr: <>Export depuis IBKR Client Portal : <em>Performance &amp; Reports → Statements → Activity → pick the period → Download as CSV</em></>,
+  tradovate: <>Export depuis Tradovate (web) : <em>Reports → Performance → Export</em></>,
+  generic: <>Copiez vos exécutions dans le modèle, une ligne par exécution. Les achats et ventes du même symbole sont regroupés automatiquement en trades aller-retour, de la même façon qu'un import de courtier.</>,
 };
 
 const BROKER_DROP_LABEL = {
-  auto: 'Drop your broker CSV (Thinkorswim or IBKR)',
-  thinkorswim: 'Drop Thinkorswim account statement CSV',
-  ibkr: 'Drop IBKR Activity Statement CSV',
-  generic: 'Drop your filled-in generic template CSV',
+  auto: 'Déposez votre CSV de courtier (Thinkorswim, IBKR ou Tradovate)',
+  thinkorswim: 'Déposez le relevé de compte Thinkorswim (CSV)',
+  ibkr: "Déposez le relevé d'activité IBKR (CSV)",
+  tradovate: 'Déposez l\'export Performance de Tradovate (CSV)',
+  generic: 'Déposez votre modèle générique rempli (CSV)',
 };
 
 // Map the free-text broker stored on an account to a dropdown value.
@@ -35,6 +38,7 @@ function brokerFromAccount(account) {
   const b = (account?.broker || '').toLowerCase();
   if (/ibkr|interactive/.test(b)) return 'ibkr';
   if (/thinkorswim|tos|schwab/.test(b)) return 'thinkorswim';
+  if (/tradovate|apex/.test(b)) return 'tradovate';
   return 'auto';
 }
 
@@ -42,45 +46,45 @@ function brokerFromAccount(account) {
    way in before giving up. Expands into the column reference when the generic
    template is the selected broker. */
 const TEMPLATE_COLUMNS = [
-  ['date', 'Required', 'YYYY-MM-DD, or MM/DD/YYYY'],
-  ['time', 'Required', '24 hour HH:MM or HH:MM:SS, or 1:05 PM'],
-  ['symbol', 'Required', 'AAPL. Futures start with a slash: /MESU26'],
-  ['side', 'Required', 'BUY or SELL. BUY TO COVER and SELL SHORT work too'],
-  ['quantity', 'Required', 'Shares or contracts, always positive'],
-  ['price', 'Required', 'Fill price per share or per contract'],
-  ['commission', 'Optional', 'Fees for that fill. Blank means 0'],
-  ['asset_type', 'Optional', 'STOCK (default), OPTION or FUTURE'],
-  ['expiry, strike, put_call', 'Options', '2026-08-28, 765, CALL or PUT'],
-  ['multiplier', 'Optional', 'Point value for a future the app does not know'],
+  ['date', 'Obligatoire', 'YYYY-MM-DD, ou MM/DD/YYYY'],
+  ['time', 'Obligatoire', 'HH:MM ou HH:MM:SS sur 24 heures, ou 1:05 PM'],
+  ['symbol', 'Obligatoire', 'AAPL. Les futures commencent par un slash : /MESU26'],
+  ['side', 'Obligatoire', 'BUY ou SELL. BUY TO COVER et SELL SHORT fonctionnent aussi'],
+  ['quantity', 'Obligatoire', 'Actions ou contrats, toujours positif'],
+  ['price', 'Obligatoire', "Prix d'exécution par action ou par contrat"],
+  ['commission', 'Facultatif', 'Frais pour cette exécution. Vide = 0'],
+  ['asset_type', 'Facultatif', 'STOCK (par défaut), OPTION ou FUTURE'],
+  ['expiry, strike, put_call', 'Options', '2026-08-28, 765, CALL ou PUT'],
+  ['multiplier', 'Facultatif', "Valeur du point pour un future que l'application ne reconnaît pas"],
 ];
 
 function GenericTemplateTip({ open, onUse }) {
   return (
     <div className="notice" style={{ marginTop: 16, display: 'block' }}>
       <div style={{ fontSize: 13.5, color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}>
-        Broker not listed?
+        Votre courtier n'est pas dans la liste ?
       </div>
       <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-        Download the{' '}
-        <a href={TEMPLATE_URL} download="generic_trades_template.csv">blank template</a>
-        {' '}or a{' '}
-        <a href={EXAMPLE_URL} download="generic_trades_example.csv">filled-in example</a>
-        , paste your fills in from any broker export or spreadsheet, and import it with
+        Téléchargez le{' '}
+        <a href={TEMPLATE_URL} download="generic_trades_template.csv">modèle vierge</a>
+        {' '}ou un{' '}
+        <a href={EXAMPLE_URL} download="generic_trades_example.csv">exemple rempli</a>
+        , collez vos exécutions depuis n'importe quel export de courtier ou tableur, puis importez-le avec
         {' '}
-        {open ? <strong>Other broker (generic template)</strong> : (
+        {open ? <strong>Autre courtier (modèle générique)</strong> : (
           <button type="button" className="btn btn-ghost btn-sm" onClick={onUse} style={{ padding: '0 4px', verticalAlign: 'baseline' }}>
-            Other broker (generic template)
+            Autre courtier (modèle générique)
           </button>
         )}
-        . Columns can be in any order, common names like Ticker, Qty or Fees are recognised, and extra columns are ignored.
+        . Les colonnes peuvent être dans n'importe quel ordre, les noms courants comme Ticker, Qty ou Fees sont reconnus, et les colonnes supplémentaires sont ignorées.
       </div>
 
       {open && (
         <div className="scroll-x" style={{ marginTop: 12 }}>
           <table style={{ fontSize: 12.5 }}>
-            <caption className="sr-only">Generic template columns</caption>
+            <caption className="sr-only">Colonnes du modèle générique</caption>
             <thead>
-              <tr><th>Column</th><th>Needed</th><th>What goes in it</th></tr>
+              <tr><th>Colonne</th><th>Requis</th><th>Ce qu'on y met</th></tr>
             </thead>
             <tbody>
               {TEMPLATE_COLUMNS.map(([name, need, what]) => (
@@ -93,8 +97,8 @@ function GenericTemplateTip({ open, onUse }) {
             </tbody>
           </table>
           <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginTop: 8 }}>
-            If any row cannot be read, nothing is imported and the error names the line, so a
-            missing fill can never quietly change your P&amp;L.
+            Si une ligne ne peut pas être lue, rien n'est importé et l'erreur indique la ligne
+            concernée, pour qu'une exécution manquante ne puisse jamais changer silencieusement votre P&amp;L.
           </div>
         </div>
       )}
@@ -111,7 +115,7 @@ function TextPreview({ file }) {
   }, [file]);
   return (
     <div style={{ background: 'var(--surface-inset)', borderRadius: 'var(--radius-md)', border: '1px solid var(--divider)', padding: 12, fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', maxHeight: 180, overflowY: 'auto', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-      {text || 'Loading preview...'}
+      {text || "Chargement de l'aperçu..."}
     </div>
   );
 }
@@ -137,7 +141,7 @@ function DropZone({ label, accept, onFile, file, icon: Icon }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current.click(); } }}
       role="button"
       tabIndex={0}
-      aria-label={file ? `Selected file ${file.name}. Choose a different file` : `${label}. Press Enter to browse`}
+      aria-label={file ? `Fichier sélectionné ${file.name}. Choisir un autre fichier` : `${label}. Appuyez sur Entrée pour parcourir`}
     >
       <input ref={inputRef} type="file" accept={accept} style={{ display: 'none' }} tabIndex={-1} onChange={e => onFile(e.target.files[0])} />
       {file ? (
@@ -150,7 +154,7 @@ function DropZone({ label, accept, onFile, file, icon: Icon }) {
         <div>
           <Icon size={28} style={{ marginBottom: 10 }} />
           <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{label}</div>
-          <div style={{ fontSize: 13, marginTop: 6 }}>Drag and drop, or click to browse</div>
+          <div style={{ fontSize: 13, marginTop: 6 }}>Glissez-déposez, ou cliquez pour parcourir</div>
         </div>
       )}
     </div>
@@ -176,7 +180,7 @@ export default function Import({ accounts, accountId }) {
 
   const handleCsvImport = async () => {
     if (!csvFile || !csvAccountId) {
-      setCsvError('Please select a file and an account.');
+      setCsvError('Veuillez sélectionner un fichier et un compte.');
       return;
     }
     setImporting(true);
@@ -198,7 +202,7 @@ export default function Import({ accounts, accountId }) {
 
   const handleDiaryUpload = async () => {
     if (!diaryFile || !diaryAccountId || !diaryDate) {
-      setDiaryError('Please select an image, account, and date.');
+      setDiaryError('Veuillez sélectionner une image, un compte et une date.');
       return;
     }
     setAnalyzing(true);
@@ -212,7 +216,7 @@ export default function Import({ accounts, accountId }) {
       const res = await importApi.uploadDiary(fd);
       setDiaryResult(res.data);
       if (res.data.analysis_error) {
-        setDiaryError('Diary saved, but AI analysis failed: ' + res.data.analysis_error);
+        setDiaryError("Journal enregistré, mais l'analyse IA a échoué : " + res.data.analysis_error);
       }
     } catch (e) {
       setDiaryError(e.response?.data?.error || e.message);
@@ -223,7 +227,7 @@ export default function Import({ accounts, accountId }) {
 
   return (
     <div>
-      <PageHeader title="Import" subtitle="Bring in your broker executions, or have Claude read a trading diary." />
+      <PageHeader title="Importer" subtitle="Importez vos exécutions de courtier, ou laissez Claude lire un journal de trading." />
 
       <div className="grid-2">
 
@@ -231,7 +235,7 @@ export default function Import({ accounts, accountId }) {
         <section className="card">
           <h2 className="section-title" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
             <FileText size={18} color="var(--accent-line)" aria-hidden="true" />
-            Import Broker CSV
+            Importer un CSV de courtier
           </h2>
 
           <DropZone
@@ -244,7 +248,7 @@ export default function Import({ accounts, accountId }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginTop: 16 }}>
             <div>
-              <label className="field-label" htmlFor="imp-csv-broker">Broker</label>
+              <label className="field-label" htmlFor="imp-csv-broker">Courtier</label>
               <select
                 id="imp-csv-broker"
                 value={csvBroker}
@@ -257,7 +261,7 @@ export default function Import({ accounts, accountId }) {
               </select>
             </div>
             <div>
-              <label className="field-label" htmlFor="imp-csv-account">Account</label>
+              <label className="field-label" htmlFor="imp-csv-account">Compte</label>
               <select
                 id="imp-csv-account"
                 value={csvAccountId}
@@ -271,7 +275,7 @@ export default function Import({ accounts, accountId }) {
                 style={{ width: '100%' }}
                 required
               >
-                <option value="">Select account...</option>
+                <option value="">Sélectionner un compte...</option>
                 {accounts.map(a => (
                   <option key={a.id} value={a.id}>{a.name}</option>
                 ))}
@@ -285,18 +289,18 @@ export default function Import({ accounts, accountId }) {
             onClick={handleCsvImport}
             disabled={importing || !csvFile || !csvAccountId}
           >
-            {importing ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Importing...</> : <><Upload size={16} /> Import Trades</>}
+            {importing ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Importation...</> : <><Upload size={16} /> Importer les trades</>}
           </button>
 
           {csvResult && (
             <div className="notice pos" role="status" style={{ marginTop: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--result-pos)', fontWeight: 600, marginBottom: 4 }}>
-                <CheckCircle size={16} /> Import Complete
+                <CheckCircle size={16} /> Import terminé
               </div>
               <div style={{ fontSize: 14 }}>{csvResult.message}</div>
               {csvResult.errors?.length > 0 && (
                 <div style={{ fontSize: 13, color: 'var(--result-neg)', marginTop: 4 }}>
-                  {csvResult.errors.length} DB error(s)
+                  {csvResult.errors.length} erreur(s) de base de données
                 </div>
               )}
             </div>
@@ -319,7 +323,7 @@ export default function Import({ accounts, accountId }) {
         <section className="card">
           <h2 className="section-title" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
             <Image size={18} color="var(--accent-line)" aria-hidden="true" />
-            Analyze Trading Diary
+            Analyser le journal de trading
           </h2>
 
           {diaryFile ? (
@@ -329,17 +333,17 @@ export default function Import({ accounts, accountId }) {
               ) : /\.(heic|heif)$/i.test(diaryFile.name) ? (
                 // Browsers cannot render HEIC; the server converts it to JPEG on upload.
                 <div style={{ padding: 12, border: '1px solid var(--divider)', borderRadius: 'var(--radius-md)', fontSize: 14, color: 'var(--text-secondary)' }}>
-                  {diaryFile.name} (iPhone photo, will be converted on upload)
+                  {diaryFile.name} (photo iPhone, sera convertie à l'import)
                 </div>
               ) : (
-                <img src={URL.createObjectURL(diaryFile)} alt="Diary preview"
+                <img src={URL.createObjectURL(diaryFile)} alt="Aperçu du journal"
                   style={{ maxWidth: '100%', maxHeight: 180, borderRadius: 'var(--radius-md)', border: '1px solid var(--divider)', display: 'block' }} />
               )}
-              <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: 8 }} onClick={() => setDiaryFile(null)}>Remove</button>
+              <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: 8 }} onClick={() => setDiaryFile(null)}>Supprimer</button>
             </div>
           ) : (
             <DropZone
-              label="Drop a photo of handwritten notes, a screenshot, or a .txt / .csv file"
+              label="Déposez une photo de notes manuscrites, une capture d'écran, ou un fichier .txt / .csv"
               accept=".png,.jpg,.jpeg,.webp,.gif,.heic,.heif,.txt,.csv"
               onFile={setDiaryFile}
               file={null}
@@ -359,14 +363,14 @@ export default function Import({ accounts, accountId }) {
               />
             </div>
             <div>
-              <label className="field-label" htmlFor="imp-diary-account">Account</label>
+              <label className="field-label" htmlFor="imp-diary-account">Compte</label>
               <select
                 id="imp-diary-account"
                 value={diaryAccountId}
                 onChange={e => setDiaryAccountId(e.target.value)}
                 style={{ width: '100%' }}
               >
-                <option value="">Select account...</option>
+                <option value="">Sélectionner un compte...</option>
                 {accounts.map(a => (
                   <option key={a.id} value={a.id}>{a.name}</option>
                 ))}
@@ -381,26 +385,26 @@ export default function Import({ accounts, accountId }) {
             disabled={analyzing || !diaryFile || !diaryAccountId || !diaryDate}
           >
             {analyzing
-              ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Analyzing with Claude AI...</>
-              : <><Upload size={16} /> Analyze Diary</>
+              ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Analyse avec Claude AI...</>
+              : <><Upload size={16} /> Analyser le journal</>
             }
           </button>
 
           {analyzing && (
             <div role="status" style={{ marginTop: 10, fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center' }}>
-              Claude is reading your diary. This takes 10 to 20 seconds...
+              Claude est en train de lire votre journal. Cela prend 10 à 20 secondes...
             </div>
           )}
 
           {diaryResult && !diaryResult.analysis_error && (
             <div className="notice pos" role="status" style={{ marginTop: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--result-pos)', fontWeight: 600, marginBottom: 4 }}>
-                <CheckCircle size={16} /> Analysis Complete
+                <CheckCircle size={16} /> Analyse terminée
               </div>
               {diaryResult.trade_count != null && (
-                <div style={{ fontSize: 14 }}>Found {diaryResult.trade_count} trade(s) in your diary.</div>
+                <div style={{ fontSize: 14 }}>{diaryResult.trade_count} trade(s) trouvé(s) dans votre journal.</div>
               )}
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>View full analysis in the Diary page.</div>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Voir l'analyse complète dans la page Journal.</div>
             </div>
           )}
 
@@ -411,7 +415,7 @@ export default function Import({ accounts, accountId }) {
           )}
 
           <div style={{ marginTop: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
-            Claude AI will read your handwritten or typed notes and extract strategy, stops, R-multiples, emotional state, and more.
+            Claude AI va lire vos notes manuscrites ou tapées et en extraire la stratégie, les stops, les multiples R, l'état émotionnel, et plus encore.
           </div>
         </section>
       </div>

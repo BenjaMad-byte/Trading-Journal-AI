@@ -26,7 +26,7 @@ function Section({ title, children }) {
 function NoData({ msg }) {
   return (
     <div className="empty" style={{ padding: '24px 0' }}>
-      {msg || 'Not enough data yet.'}
+      {msg || 'Pas encore assez de données.'}
     </div>
   );
 }
@@ -47,7 +47,7 @@ const barTip = ({ active, payload, label }) => {
 
 
 export function RMultipleDist({ data }) {
-  if (!data || data.every(d => d.count === 0)) return <NoData msg="No R-multiple data. Log stop loss and fill in R-multiple per trade." />;
+  if (!data || data.every(d => d.count === 0)) return <NoData msg="Aucune donnée de Multiple R. Enregistre le stop loss et renseigne le Multiple R par trade." />;
   const filtered = data.filter(d => d.count > 0);
   return (
     <ResponsiveContainer width="100%" height={200}>
@@ -69,15 +69,15 @@ export function RMultipleDist({ data }) {
 }
 
 export function EmotionTable({ data }) {
-  if (!data || data.length === 0) return <NoData msg="No emotion data. Log emotional state per trade." />;
+  if (!data || data.length === 0) return <NoData msg="Aucune donnée émotionnelle. Enregistre l'état émotionnel par trade." />;
 
   return (
     <div className="scroll-x">
     <table style={{ minWidth: 520 }}>
       <thead>
         <tr>
-          {['State', 'Trades', 'Win Rate', 'Avg P&L', 'Avg R'].map(h => (
-            <th key={h} className={h === 'State' ? undefined : 'num'}>{h}</th>
+          {['État', 'Trades', 'Taux de réussite', 'P&L moyen', 'R moyen'].map(h => (
+            <th key={h} className={h === 'État' ? undefined : 'num'}>{h}</th>
           ))}
         </tr>
       </thead>
@@ -111,7 +111,7 @@ export function EmotionTable({ data }) {
 }
 
 export function MistakeFreq({ data }) {
-  if (!data || data.length === 0) return <NoData msg="No mistake data. Tag mistakes per trade." />;
+  if (!data || data.length === 0) return <NoData msg="Aucune donnée d'erreur. Tague les erreurs par trade." />;
   return (
     <ResponsiveContainer width="100%" height={Math.max(160, data.length * 36)}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
@@ -127,15 +127,15 @@ export function MistakeFreq({ data }) {
 
 export function HoldTime({ data }) {
   if (!data || (data.winners_avg_min == null && data.losers_avg_min == null)) {
-    return <NoData msg="Not enough trade timing data yet." />;
+    return <NoData msg="Pas encore assez de données de timing de trade." />;
   }
   const bars = [
-    { label: 'Winners', value: data.winners_avg_min, fill: 'var(--result-pos)' },
-    { label: 'Losers', value: data.losers_avg_min, fill: 'var(--result-neg)' },
+    { label: 'Gagnants', value: data.winners_avg_min, fill: 'var(--result-pos)' },
+    { label: 'Perdants', value: data.losers_avg_min, fill: 'var(--result-neg)' },
   ].filter(b => b.value != null);
 
   const fmtMin = (m) => {
-    if (m == null) return 'n/a';
+    if (m == null) return 'n/d';
     if (m < 60) return `${Math.round(m)}m`;
     return `${Math.floor(m / 60)}h ${Math.round(m % 60)}m`;
   };
@@ -147,14 +147,14 @@ export function HoldTime({ data }) {
           <div className="num" style={{ fontSize: 30, fontWeight: 600, fontFamily: 'var(--font-display)', color: b.fill, lineHeight: 1 }}>
             {fmtMin(b.value)}
           </div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Avg hold ({b.label.toLowerCase()})</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Durée moy. ({b.label.toLowerCase()})</div>
         </div>
       ))}
       {bars.length === 2 && bars[1].value != null && bars[0].value != null && (
         <div style={{ flex: '1 1 160px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
           {bars[1].value > bars[0].value
-            ? `You hold losers ${(bars[1].value / bars[0].value).toFixed(1)}x longer than winners. Consider cutting losses faster.`
-            : `You hold winners ${(bars[0].value / bars[1].value).toFixed(1)}x longer than losers. Good discipline, letting winners run.`}
+            ? `Tu gardes tes perdants ${(bars[1].value / bars[0].value).toFixed(1)}x plus longtemps que tes gagnants. Pense à couper les pertes plus vite.`
+            : `Tu gardes tes gagnants ${(bars[0].value / bars[1].value).toFixed(1)}x plus longtemps que tes perdants. Bonne discipline, tu laisses courir les gains.`}
         </div>
       )}
     </div>
@@ -182,12 +182,12 @@ export default function Edge({ accountId }) {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 2 }}>Edge Analytics</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 2 }}>Analyses Edge</h2>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            {data ? `${data.total_trades || 0} trades` : 'Loading...'}
+            {data ? `${data.total_trades || 0} trades` : 'Chargement...'}
             {data?.expectancy != null && (
               <span style={{ marginLeft: 12, color: data.expectancy >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>
-                Expectancy: {data.expectancy >= 0 ? '+' : ''}{fmt$(data.expectancy)}/trade
+                Espérance : {data.expectancy >= 0 ? '+' : ''}{fmt$(data.expectancy)}/trade
               </span>
             )}
           </div>
@@ -206,19 +206,19 @@ export default function Edge({ accountId }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <Section title="R-Multiple Distribution">
+            <Section title="Distribution du Multiple R">
               <RMultipleDist data={data?.r_multiple_dist} />
             </Section>
-            <Section title="Hold Time, Winners vs. Losers">
+            <Section title="Durée de détention, Gagnants vs Perdants">
               <HoldTime data={data?.hold_time} />
             </Section>
           </div>
 
-          <Section title="Emotion vs. Outcome">
+          <Section title="Émotion vs résultat">
             <EmotionTable data={data?.emotion_outcomes} />
           </Section>
 
-          <Section title="Mistake Frequency">
+          <Section title="Fréquence des erreurs">
             <MistakeFreq data={data?.mistake_frequency} />
           </Section>
         </div>

@@ -17,8 +17,8 @@ export default function YearBehind({ accountId }) {
     return () => { live = false; };
   }, [accountId]);
 
-  if (months == null) return <div className="v3-empty">Loading…</div>;
-  if (!months.length) return <div className="v3-empty">No months to show yet.</div>;
+  if (months == null) return <div className="v3-empty">Chargement…</div>;
+  if (!months.length) return <div className="v3-empty">Aucun mois à afficher pour l'instant.</div>;
 
   const peak = Math.max(1, ...months.map((m) => Math.abs(m.net_pnl || 0)));
   let running = 0;
@@ -28,12 +28,12 @@ export default function YearBehind({ accountId }) {
       <table className="v3-t">
         <thead>
           <tr>
-            <th>Month</th>
+            <th>Mois</th>
             <th className="r">Trades</th>
-            <th className="r v3-hide-s">Win rate</th>
-            <th className="v3-hide-s">Shape</th>
+            <th className="r v3-hide-s">Taux de réussite</th>
+            <th className="v3-hide-s">Forme</th>
             <th className="r">Net</th>
-            <th className="r">Balance</th>
+            <th className="r">Solde</th>
           </tr>
         </thead>
         <tbody>
