@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+venv
+.venv
+trading_journal.db
+trading_journal.db-wal
+trading_journal.db-shm
+trading_journal.db.before_restore
+uploads
+.env
+tests
