@@ -8,6 +8,7 @@ import { accountsApi } from '../api';
 import { selectionLabel } from '../accountSelection';
 import useModalFocus from './useModalFocus';
 import aiJournalLogo from '../assets/ai-journal-logo.png';
+import { useT } from '../i18n';
 
 // Every page stays one click away. Import, Brain and Add Trade live with the
 // account selector, Help and Settings on the right; seven pages keep their labels.
@@ -351,6 +352,7 @@ export default function AppHeader({
   page, onNavigate, accounts, selectedAccountIds, onSelectAccounts,
   onAddTrade, onAccountCreated, brainOpen, onToggleBrain, detailOrigin = 'trades',
 }) {
+  const { t } = useT();
   // Trade detail keeps the page it was opened from highlighted (Trade View, Exit Lab or Reports).
   const activeId = page === 'trade-detail' ? detailOrigin : page;
 
@@ -388,18 +390,18 @@ export default function AppHeader({
               type="button"
               onClick={() => onNavigate(id)}
               className={`app-nav-item${activeId === id ? ' active' : ''}`}
-              title={label}
-              aria-label={label}
+              title={t(label)}
+              aria-label={t(label)}
               aria-current={activeId === id ? 'page' : undefined}
             >
               <Icon size={16} aria-hidden="true" />
-              <span className="app-nav-label">{label}</span>
+              <span className="app-nav-label">{t(label)}</span>
             </button>
           ))}
         </nav>
 
         <div className="app-actions">
-          {[["help", "Help", HelpCircle], ["settings", "Settings", SettingsIcon]].map(([id, label, Icon]) => <button key={id} type="button" className={`btn btn-ghost btn-icon${page === id ? ' active' : ''}`} aria-label={label} title={label} aria-current={page === id ? 'page' : undefined} onClick={() => onNavigate(id)}><Icon size={18} aria-hidden="true" /></button>)}
+          {[["help", "Help", HelpCircle], ["settings", "Settings", SettingsIcon]].map(([id, label, Icon]) => <button key={id} type="button" className={`btn btn-ghost btn-icon${page === id ? ' active' : ''}`} aria-label={t(label)} title={t(label)} aria-current={page === id ? 'page' : undefined} onClick={() => onNavigate(id)}><Icon size={18} aria-hidden="true" /></button>)}
           <button
             type="button"
             className={`btn btn-ghost${brainOpen ? ' active' : ''}`}

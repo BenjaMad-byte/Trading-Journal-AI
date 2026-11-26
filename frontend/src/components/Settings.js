@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Pencil, GitMerge, Trash2, Search } from 'lucide-react';
 import { libraryApi, appSettingsApi, cloudApi } from '../api';
+import { useT, LANGUAGES, setLang } from '../i18n';
 import { PageHeader } from './ui';
 import { THEMES, activeTheme, setTheme } from '../theme';
 
@@ -19,13 +20,15 @@ const CLOUD_SESSION_KEY = 'lj_cloud_session';
 
 /* Theme picker. Saved in this browser only; nothing goes to the journal database. */
 function Appearance() {
+  const { t, lang } = useT();
   const [active, setActive] = useState(activeTheme);
   const pick = (id) => setActive(setTheme(id));
   return (
+    <>
     <section className="card" aria-labelledby="appearance-title">
-      <h2 className="section-title" id="appearance-title">Theme</h2>
+      <h2 className="section-title" id="appearance-title">{t('Theme')}</h2>
       <div className="section-sub">
-        Colours, fonts and chart style. Everything stays in the same place. Saved in this browser only.
+        {t('Colours, fonts and chart style. Everything stays in the same place. Saved in this browser only.')}
       </div>
       <div className="theme-picker" role="radiogroup" aria-labelledby="appearance-title">
         {THEMES.map((t) => (
@@ -46,6 +49,17 @@ function Appearance() {
         ))}
       </div>
     </section>
+    <section className="card" aria-labelledby="language-title" style={{ marginTop: 'var(--space-4)' }}>
+      <h2 className="section-title" id="language-title">{t('Language')}</h2>
+      <div className="section-sub">
+        {t('Language of the interface. Screens not translated yet stay in English. Saved in this browser only.')}
+      </div>
+      <select value={lang} onChange={(e) => setLang(e.target.value)} aria-labelledby="language-title"
+        style={{ fontSize: 14, padding: '8px 12px', minWidth: 200 }}>
+        {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+      </select>
+    </section>
+    </>
   );
 }
 
@@ -535,6 +549,7 @@ function CloudAccount() {
 }
 
 export default function Settings() {
+  const { t } = useT();
   const [lib, setLib] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [section, setSection] = useState('strategy');
@@ -565,15 +580,15 @@ export default function Settings() {
   return (
     <div>
       <PageHeader
-        title="Settings"
+        title={t('Settings')}
         subtitle={section === 'appearance'
-          ? 'Choose how the journal looks.'
+          ? t('Choose how the journal looks.')
           : section === 'account'
-          ? 'Sign in to back up the journal to the cloud and restore it elsewhere.'
-          : 'Clean up the names the journal uses. Renames and merges update every trade that uses the name.'}
+          ? t('Sign in to back up the journal to the cloud and restore it elsewhere.')
+          : t('Clean up the names the journal uses. Renames and merges update every trade that uses the name.')}
       />
 
-      <div className="tabs" role="tablist" aria-label="Settings sections" style={{ marginBottom: 'var(--space-5)' }}>
+      <div className="tabs" role="tablist" aria-label={t('Settings sections')} style={{ marginBottom: 'var(--space-5)' }}>
         {SECTIONS.map(s => (
           <button
             type="button"
@@ -587,7 +602,7 @@ export default function Settings() {
             onClick={() => setSection(s.id)}
             onKeyDown={onTabKey}
           >
-            {s.label}
+            {t(s.label)}
             {lib && s.id !== 'general' && s.id !== 'account' && s.id !== 'appearance' && (
               <span className="text-muted num" style={{ marginLeft: 6, fontWeight: 500 }}>
                 {s.id === 'tag'

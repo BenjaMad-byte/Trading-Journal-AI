@@ -378,7 +378,7 @@ test('Settings has General, Strategies, Sources, Tags and Appearance sections, a
   fireEvent.click(within(screen.getByRole('banner')).getByRole('button', { name: 'Settings' }));
   const tablist = await screen.findByRole('tablist', { name: 'Settings sections' });
   expect(within(tablist).getAllByRole('tab').map(t => t.textContent.replace(/\d+/g, '').trim()))
-    .toEqual(['General', 'Strategies', 'Sources', 'Tags', 'Appearance']);
+    .toEqual(['General', 'Account', 'Strategies', 'Sources', 'Tags', 'Appearance']);
   expect(await screen.findByText('VWAP Cross')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Edit VWAP Cross' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Delete VWAP Cross' })).toBeInTheDocument();
