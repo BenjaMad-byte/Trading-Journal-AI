@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import './landing.css';
 import dashboardImg from './dashboard.png';
 import {
-  PRODUCT, WAITLIST_ENDPOINT, NAV_LINKS, HERO, PROBLEM, BENEFITS_TITLE, BENEFITS,
+  PRODUCT, SUPABASE_URL, SUPABASE_ANON_KEY, NAV_LINKS, HERO, PROBLEM, BENEFITS_TITLE, BENEFITS,
   STEPS_TITLE, STEPS, TAGLINE, PROOF, FAQ_TITLE, FAQ, FINAL, FOOTER, META,
 } from './copy';
 
@@ -56,17 +56,26 @@ function WaitlistForm({ id }) {
       setStatus({ kind: 'error', message: 'Cette adresse email n’est pas valide. Vérifie le format, par exemple nom@domaine.com.' });
       return;
     }
-    if (!WAITLIST_ENDPOINT) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       setStatus({ kind: 'error', message: 'La liste d’attente n’est pas encore connectée. Réessaie plus tard.' });
       return;
     }
     setStatus({ kind: 'loading', message: '' });
     try {
-      const res = await fetch(WAITLIST_ENDPOINT, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: value }),
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ email: value.toLowerCase() }),
       });
+      if (res.status === 409) {
+        setStatus({ kind: 'ok', message: `${value} est déjà sur la liste d’attente.` });
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
       setStatus({ kind: 'ok', message: `Inscription enregistrée pour ${value}.` });
       setEmail('');
