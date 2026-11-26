@@ -153,3 +153,12 @@ export const pointValuesApi = {
 export const updateApi = {
   get: () => api.get('/api/update'),
 };
+
+// Settings > Account: Supabase-backed email/password login + cloud backup/restore.
+export const cloudApi = {
+  signup: (email, password) => api.post('/api/auth/signup', { email, password }),
+  login: (email, password) => api.post('/api/auth/login', { email, password }),
+  backup: (session) => api.post('/api/backup', session),
+  restore: (session) => api.post('/api/restore', session),
+  status: (session) => api.get('/api/backup/status', { params: session }),
+};
