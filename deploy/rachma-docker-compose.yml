@@ -1,0 +1,23 @@
+services:
+  trading-journal-api:
+    build: ./trading-journal/lucrumjournal/backend
+    container_name: trading-journal-api
+    restart: unless-stopped
+    ports:
+      - "8011:8011"
+    env_file:
+      - ./trading-journal/lucrumjournal/backend/.env
+    volumes:
+      - ./trading-journal/lucrumjournal/backend/trading_journal.db:/app/trading_journal.db
+      - ./trading-journal/lucrumjournal/backend/uploads:/app/uploads
+
+  amber-terminal:
+    build: ./amber-terminal/amber-terminal
+    container_name: amber-terminal
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      - ALLOWED_HOSTS=192.168.1.165
+    volumes:
+      - ./amber-terminal/amber-terminal/data:/app/data
