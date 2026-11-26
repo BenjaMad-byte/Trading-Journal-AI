@@ -3,8 +3,10 @@
 
 export const PRODUCT = '{{nom du produit}}';
 
-// Adresse qui reçoit { email }. Vide tant que la collecte n'est pas décidée.
-export const WAITLIST_ENDPOINT = '';
+// Liste d'attente stockée dans Supabase (table public.waitlist, voir supabase/waitlist.sql).
+// La clé anon est publique par conception : seule la règle RLS d'insertion la protège.
+export const SUPABASE_URL = (process.env.REACT_APP_SUPABASE_URL || '').replace(/\/+$/, '');
+export const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 
 export const NAV_LINKS = [
   { href: '#benefices', label: 'Bénéfices' },
