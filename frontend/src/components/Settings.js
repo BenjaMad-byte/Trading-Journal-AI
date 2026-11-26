@@ -493,11 +493,11 @@ function CloudAccount() {
           restore it from another computer.
         </p>
         <form onSubmit={submit} className="settings-form" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-          <label>
+          <label style={{ flex: '0 0 auto' }}>
             <span className="field-label">Email</span>
             <input type="email" required autoFocus value={email} onChange={e => setEmail(e.target.value)} />
           </label>
-          <label>
+          <label style={{ flex: '0 0 auto' }}>
             <span className="field-label">Password</span>
             <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} />
           </label>
