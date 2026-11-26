@@ -1,5 +1,6 @@
 import os
 import re
+import hmac
 import json
 import uuid
 import sqlite3
@@ -9,7 +10,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Query
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -971,6 +972,95 @@ def delete_execution(trade_id: int, exec_idx: int, conn: sqlite3.Connection = De
             raise HTTPException(status_code=404, detail="Execution index out of range")
         execs.pop(exec_idx)
         return _recalculate_and_save(trade, execs, conn, trade_id)
+
+
+# ── Live execution feed (NinjaTrader AddOn) ─────────────────────────────────────
+# One fill at a time, same shape as a CSV execution row. The AddOn posts here as
+# soon as an order fills, so the trade exists in the journal the moment the
+# round trip closes — no CSV export/import step.
+
+class LiveExecutionBody(BaseModel):
+    account_id: int
+    ticker: str
+    instrument_type: str = "STOCK"
+    side: str          # LONG | SHORT — the position this fill belongs to
+    date: str          # YYYY-MM-DD
+    time: str          # HH:MM:SS
+    action: str        # BOT | SOLD — this fill's own direction
+    qty: int
+    price: float
+    commission: float = 0.0
+
+
+@app.post("/api/live/execution")
+def live_execution(
+    body: LiveExecutionBody,
+    x_api_key: str | None = Header(None, alias="X-API-Key"),
+    conn: sqlite3.Connection = Depends(get_connection),
+):
+    expected_key = os.getenv("NINJATRADER_API_KEY", "")
+    if not expected_key or not hmac.compare_digest((x_api_key or "").encode(), expected_key.encode()):
+        raise HTTPException(status_code=401, detail="Invalid or missing X-API-Key")
+
+    account = conn.execute("SELECT id FROM accounts WHERE id=?", (body.account_id,)).fetchone()
+    if not account:
+        raise ValueError(f"Account {body.account_id} not found")
+
+    side = body.side.upper()
+    if side not in ('LONG', 'SHORT'):
+        raise ValueError("side must be LONG or SHORT")
+    action = body.action.upper()
+    if action not in ('BOT', 'SOLD'):
+        raise ValueError("action must be BOT or SOLD")
+    ticker = body.ticker.upper()
+    instrument_type = body.instrument_type.upper()
+
+    execution = {
+        'date': body.date, 'time': body.time, 'action': action,
+        'qty': body.qty, 'price': body.price, 'commission': body.commission,
+    }
+
+    # Attach to whichever position on this account/ticker/side is still open,
+    # so partial fills and scale-outs land on the same trade.
+    candidates = conn.execute(
+        "SELECT * FROM trades WHERE account_id=? AND ticker=? AND side=? AND instrument_type=? "
+        "ORDER BY imported_at DESC",
+        (body.account_id, ticker, side, instrument_type)
+    ).fetchall()
+
+    open_trade = None
+    for row in candidates:
+        t = row_to_dict(row)
+        t['executions'] = json.loads(t.get('executions') or '[]')
+        if _is_open_position(t):
+            open_trade = t
+            break
+
+    if open_trade:
+        execs = open_trade['executions']
+        execs.append(execution)
+        updated = _recalculate_and_save(open_trade, execs, conn, open_trade['id'])
+        return {"trade": updated, "message": "Execution added to open trade."}
+
+    # No open position for this ticker/side: this fill starts a new trade.
+    trade_group = f"{body.date}_{ticker}_{instrument_type}_{body.time.replace(':', '')}"
+    cursor = conn.execute("""
+        INSERT INTO trades
+            (account_id, trade_group, date, ticker, instrument_type, side,
+             gross_pnl, net_pnl, commissions, executions, source)
+        VALUES (?,?,?,?,?,?,?,?,?,?,'ninjatrader')
+        ON CONFLICT(trade_group, account_id) DO NOTHING
+    """, (
+        body.account_id, trade_group, body.date, ticker, instrument_type, side,
+        0.0, -body.commission, body.commission, json.dumps([execution]),
+    ))
+    conn.commit()
+
+    row = conn.execute(
+        "SELECT * FROM trades WHERE trade_group=? AND account_id=?",
+        (trade_group, body.account_id)
+    ).fetchone()
+    return {"trade": row_to_dict(row), "message": "New trade opened."}
 
 
 @app.delete("/api/trades/{trade_id}")
