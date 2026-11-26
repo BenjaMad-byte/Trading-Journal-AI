@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Pencil, GitMerge, Trash2, Search } from 'lucide-react';
-import { libraryApi, appSettingsApi } from '../api';
+import { libraryApi, appSettingsApi, cloudApi } from '../api';
 import { PageHeader } from './ui';
 import { THEMES, activeTheme, setTheme } from '../theme';
 
 const SECTIONS = [
   { id: 'general', label: 'General' },
+  { id: 'account', label: 'Account' },
   { id: 'strategy', label: 'Strategies' },
   { id: 'source', label: 'Sources' },
   { id: 'tag', label: 'Tags' },
   { id: 'appearance', label: 'Appearance' },
 ];
 // Sections that load nothing from the name library.
-const STATIC_SECTIONS = new Set(['general', 'appearance']);
+const STATIC_SECTIONS = new Set(['general', 'account', 'appearance']);
+
+const CLOUD_SESSION_KEY = 'lj_cloud_session';
 
 /* Theme picker. Saved in this browser only; nothing goes to the journal database. */
 function Appearance() {
@@ -394,6 +397,143 @@ function GeneralSettings() {
   );
 }
 
+function loadCloudSession() {
+  try {
+    const raw = localStorage.getItem(CLOUD_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Account: email/password login (Supabase) + cloud backup/restore of the journal. */
+function CloudAccount() {
+  const [session, setSession] = useState(loadCloudSession);
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+  const [lastBackup, setLastBackup] = useState(null);
+
+  const saveSession = (s) => {
+    setSession(s);
+    if (s) localStorage.setItem(CLOUD_SESSION_KEY, JSON.stringify(s));
+    else localStorage.removeItem(CLOUD_SESSION_KEY);
+  };
+
+  const refreshStatus = useCallback((s) => {
+    if (!s) return;
+    cloudApi.status({ access_token: s.access_token, refresh_token: s.refresh_token })
+      .then(res => setLastBackup(res.data.last_backup))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { refreshStatus(session); }, [session, refreshStatus]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      if (mode === 'signup') {
+        const res = await cloudApi.signup(email, password);
+        if (res.data.access_token) {
+          saveSession({ access_token: res.data.access_token, refresh_token: res.data.refresh_token, email: res.data.email });
+          setNotice('Account created and signed in.');
+        } else {
+          setNotice(res.data.message);
+        }
+      } else {
+        const res = await cloudApi.login(email, password);
+        saveSession({ access_token: res.data.access_token, refresh_token: res.data.refresh_token, email: res.data.email });
+      }
+      setPassword('');
+    } catch (e2) {
+      setError(errText(e2));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const logout = () => { saveSession(null); setLastBackup(null); };
+
+  const doBackup = async () => {
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      await cloudApi.backup({ access_token: session.access_token, refresh_token: session.refresh_token });
+      setNotice('Backup uploaded.');
+      refreshStatus(session);
+    } catch (e2) {
+      setError(errText(e2));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doRestore = async () => {
+    if (!window.confirm('Restore the latest cloud backup? This replaces the current local journal (a safety copy is kept on disk).')) return;
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      await cloudApi.restore({ access_token: session.access_token, refresh_token: session.refresh_token });
+      setNotice('Restored. Reloading...');
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (e2) {
+      setError(errText(e2));
+      setBusy(false);
+    }
+  };
+
+  if (!session) {
+    return (
+      <div className="card" style={{ padding: 'var(--space-5)', maxWidth: 420 }}>
+        <h3 style={{ marginTop: 0 }}>{mode === 'signup' ? 'Create an account' : 'Sign in'}</h3>
+        <p className="text-muted" style={{ fontSize: 13, marginBottom: 'var(--space-4)' }}>
+          Link the journal to an email address so you can back it up and
+          restore it from another computer.
+        </p>
+        <form onSubmit={submit} className="settings-form" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+          <label>
+            <span className="field-label">Email</span>
+            <input type="email" required autoFocus value={email} onChange={e => setEmail(e.target.value)} />
+          </label>
+          <label>
+            <span className="field-label">Password</span>
+            <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} />
+          </label>
+          <div className="settings-form-actions">
+            <button type="submit" className="btn btn-primary btn-sm" disabled={busy}>
+              {mode === 'signup' ? 'Create account' : 'Sign in'}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setMode(m => m === 'signup' ? 'login' : 'signup'); setError(null); }}>
+              {mode === 'signup' ? 'I already have an account' : 'Create an account'}
+            </button>
+          </div>
+          {error && <div className="notice neg" role="alert">{error}</div>}
+          {notice && <div className="notice pos" role="status">{notice}</div>}
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card" style={{ padding: 'var(--space-5)', maxWidth: 480 }}>
+      <h3 style={{ marginTop: 0 }}>Signed in</h3>
+      <p className="text-muted" style={{ fontSize: 13 }}>{session.email}</p>
+      <p className="text-muted" style={{ fontSize: 13 }}>
+        Last backup: {lastBackup ? new Date(lastBackup).toLocaleString() : 'none'}
+      </p>
+      {error && <div className="notice neg" role="alert" style={{ marginBottom: 12 }}>{error}</div>}
+      {notice && <div className="notice pos" role="status" style={{ marginBottom: 12 }}>{notice}</div>}
+      <div className="settings-form-actions">
+        <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={doBackup}>Back up now</button>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={doRestore}>Restore latest backup</button>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={logout}>Sign out</button>
+      </div>
+    </div>
+  );
+}
+
 export default function Settings() {
   const [lib, setLib] = useState(null);
   const [loadError, setLoadError] = useState(null);
@@ -428,6 +568,8 @@ export default function Settings() {
         title="Settings"
         subtitle={section === 'appearance'
           ? 'Choose how the journal looks.'
+          : section === 'account'
+          ? 'Sign in to back up the journal to the cloud and restore it elsewhere.'
           : 'Clean up the names the journal uses. Renames and merges update every trade that uses the name.'}
       />
 
@@ -446,7 +588,7 @@ export default function Settings() {
             onKeyDown={onTabKey}
           >
             {s.label}
-            {lib && s.id !== 'general' && s.id !== 'appearance' && (
+            {lib && s.id !== 'general' && s.id !== 'account' && s.id !== 'appearance' && (
               <span className="text-muted num" style={{ marginLeft: 6, fontWeight: 500 }}>
                 {s.id === 'tag'
                   ? TAG_TYPE_ORDER.reduce((n, t) => n + (lib.tags?.[t]?.length || 0), 0)
@@ -459,6 +601,7 @@ export default function Settings() {
 
       <div role="tabpanel" id="settings-panel" aria-labelledby={`settings-tab-${section}`}>
         {section === 'general' && <GeneralSettings />}
+        {section === 'account' && <CloudAccount />}
         {section === 'appearance' && <Appearance />}
         {!STATIC_SECTIONS.has(section) && loadError && <div className="notice neg" role="alert">{loadError}</div>}
         {!STATIC_SECTIONS.has(section) && !lib && !loadError && <div className="skeleton" style={{ height: 320 }} />}

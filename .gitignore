@@ -29,3 +29,6 @@ backend/uploads/
 
 # once-a-day release check cache
 backend/update_check.json
+
+# safety copy written by cloud restore
+*.before_restore

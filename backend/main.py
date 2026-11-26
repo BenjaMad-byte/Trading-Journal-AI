@@ -39,6 +39,7 @@ from ai_analysis import (
 import leaks
 from daily_summary import build_daily_context, generate_daily_summary
 from library import router as library_router, init_library_tables, apply_aliases, library_names
+import auth as cloud_auth
 from exitlab.api import router as exitlab_router
 import edge_sync
 import update_check
@@ -122,6 +123,33 @@ def _summary_cache_key(key: str, account_id: list[int] | None) -> tuple[str, int
     if account_id and len(account_id) > 1:
         return f"{key}|accounts={','.join(map(str, account_id))}", None
     return key, account_id[0] if account_id else None
+
+
+# ── Cloud account (Supabase): email/password login + backup/restore ───────────
+
+@app.post("/api/auth/signup")
+def auth_signup(body: cloud_auth.SignupBody):
+    return cloud_auth.signup(body)
+
+
+@app.post("/api/auth/login")
+def auth_login(body: cloud_auth.LoginBody):
+    return cloud_auth.login(body)
+
+
+@app.post("/api/backup")
+def create_backup(body: cloud_auth.SessionBody):
+    return cloud_auth.backup(body)
+
+
+@app.post("/api/restore")
+def restore_backup(body: cloud_auth.SessionBody):
+    return cloud_auth.restore(body)
+
+
+@app.get("/api/backup/status")
+def backup_status(access_token: str = Query(...), refresh_token: str = Query(...)):
+    return cloud_auth.backup_status(access_token, refresh_token)
 
 
 # ── Exception handlers ─────────────────────────────────────────────────────────
