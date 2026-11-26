@@ -5,14 +5,17 @@ import './v3.css';
 import './themes.css';
 import { watchOtherTabs } from './theme';
 import App from './App';
+import Landing from './landing/Landing';
 import reportWebVitals from './reportWebVitals';
 
 watchOtherTabs();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+const isLanding = window.location.pathname.replace(/\/+$/, '') === '/landing';
+
 root.render(
   <React.StrictMode>
-    <App />
+    {isLanding ? <Landing /> : <App />}
   </React.StrictMode>
 );
 
