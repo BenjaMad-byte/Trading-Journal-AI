@@ -3,7 +3,7 @@ import './landing.css';
 import dashboardImg from './dashboard.png';
 import {
   PRODUCT, SUPABASE_URL, SUPABASE_ANON_KEY, NAV_LINKS, HERO, PROBLEM, BENEFITS_TITLE, BENEFITS,
-  STEPS_TITLE, STEPS, TAGLINE, PROOF, FAQ_TITLE, FAQ, FINAL, FOOTER, META,
+  STEPS_TITLE, STEPS, TAGLINE, FAQ_TITLE, FAQ, FINAL, FOOTER, META,
 } from './copy';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -291,27 +291,6 @@ export default function Landing() {
 
         <Tagline />
 
-        <Reveal as="section" className="section" aria-labelledby="t-preuve">
-          <h2 id="t-preuve" className="section-title heading-2 centered">{PROOF.title}</h2>
-          <p className="caption-2 muted centered note">{PROOF.note}</p>
-          <ul className="stats">
-            {PROOF.stats.map((s) => (
-              <li key={s.label} className="stat">
-                <span className="stat-v heading-5">{s.value}</span>
-                <span className="caption-2 muted">{s.label}</span>
-              </li>
-            ))}
-          </ul>
-          <ul className="quotes">
-            {PROOF.quotes.map((q, i) => (
-              <li key={i} className="card">
-                <blockquote className="body-2">{q.text}</blockquote>
-                <p className="caption-2 muted">{q.author}</p>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-
         <Reveal as="section" className="section narrow" id="faq" aria-labelledby="t-faq">
           <h2 id="t-faq" className="section-title heading-2">{FAQ_TITLE}</h2>
           <div className="faq">
@@ -333,13 +312,6 @@ export default function Landing() {
 
       <footer className="footer">
         <p className="caption-2 muted">{FOOTER.disclaimer}</p>
-        <ul className="footer-links">
-          {FOOTER.legal.map((l) => (
-            <li key={l.label}>
-              <span className="footer-off caption-2" aria-disabled="true" title={l.note}>{l.label}</span>
-            </li>
-          ))}
-        </ul>
       </footer>
     </div>
   );
