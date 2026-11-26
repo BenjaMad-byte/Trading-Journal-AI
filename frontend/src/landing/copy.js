@@ -1,7 +1,7 @@
-// Tout le texte de la landing vit ici. Chaque {{marqueur}} est une information
-// que le produit ne fournit pas encore : à remplacer avant publication.
+// Tout le texte de la landing vit ici. Un {{marqueur}} est une information
+// encore manquante : à remplacer avant publication.
 
-export const PRODUCT = '{{nom du produit}}';
+export const PRODUCT = 'Lucrum Journal';
 
 // Liste d'attente stockée dans Supabase (table public.waitlist, voir supabase/waitlist.sql).
 // La clé anon est publique par conception : seule la règle RLS d'insertion la protège.
@@ -78,19 +78,6 @@ export const STEPS = [
 export const TAGLINE =
   'Un bon journal ne juge pas ton résultat. Il juge ta façon de trader, trade après trade, jusqu’à ce que ta méthode devienne un réflexe.';
 
-export const PROOF = {
-  title: 'Ce que disent les traders',
-  note: 'Emplacements réservés : aucun témoignage réel n’a encore été fourni.',
-  stats: [
-    { value: '{{nombre d’utilisateurs}}', label: 'traders inscrits' },
-    { value: '{{nombre de trades analysés}}', label: 'trades analysés' },
-  ],
-  quotes: [
-    { text: '{{témoignage 1}}', author: '{{nom, profil de trader}}' },
-    { text: '{{témoignage 2}}', author: '{{nom, profil de trader}}' },
-  ],
-};
-
 export const FAQ_TITLE = 'Questions fréquentes';
 
 export const FAQ = [
@@ -116,11 +103,11 @@ export const FAQ = [
   },
   {
     q: 'Combien ça coûte ?',
-    a: '{{prix}}',
+    a: 'Gratuit. Le journal est open source sous licence MIT, sans offre payante.',
   },
   {
     q: 'À quelle date l’accès s’ouvre ?',
-    a: '{{date d’ouverture}}',
+    a: 'Tu seras prévenu par email dès l’ouverture, sans avoir à revenir sur cette page.',
   },
   {
     q: 'Le journal remplace un conseil financier ?',
@@ -134,10 +121,6 @@ export const FINAL = {
 };
 
 export const FOOTER = {
-  legal: [
-    { label: 'Confidentialité', note: '{{lien confidentialité}}' },
-    { label: 'Conditions', note: '{{lien conditions}}' },
-  ],
   disclaimer:
     'Ce n’est pas un conseil financier. Les captures montrent des données de démonstration, pas des trades réels.',
 };
